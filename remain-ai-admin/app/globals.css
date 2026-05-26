@@ -1,0 +1,89 @@
+/* Pretendard 웹폰트 — @import는 다른 룰보다 먼저 와야 함 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color: #0f172a; /* slate-900 */
+  background: #f8fafc; /* slate-50 — admin canvas */
+}
+
+/* iOS Safe Area */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 한국어 줄바꿈 + 균형 */
+.word-keep-all {
+  word-break: keep-all;
+}
+.text-balance {
+  text-wrap: balance;
+}
+
+/* 포커스 링 — 키보드만 */
+:where(button, a):focus-visible {
+  outline: 2px solid rgba(15, 23, 42, 0.4);
+  outline-offset: 3px;
+  border-radius: 10px;
+}
+
+/* 부드러운 마운트 페이드 */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.35s ease-out both;
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 오브 모션 — /session/[id] 페이지에서 사용 */
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.035); }
+}
+@keyframes orb-listen {
+  0%, 100% { transform: scale(1.01); }
+  50%      { transform: scale(1.05); }
+}
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50%      { opacity: 1; transform: scale(1.04); }
+}
+@keyframes spin-orb {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(2%, -2%); }
+}
+.animate-orb-breathe { animation: orb-breathe 6s ease-in-out infinite; }
+.animate-orb-listen  { animation: orb-listen 2.4s ease-in-out infinite; }
+.animate-pulse-soft  { animation: pulse-soft 2.4s ease-in-out infinite; }
+.animate-spin-orb    { animation: spin-orb 28s linear infinite; }
+.animate-drift       { animation: drift 14s ease-in-out infinite; }
