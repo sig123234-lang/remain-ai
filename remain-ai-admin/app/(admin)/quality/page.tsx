@@ -4,7 +4,7 @@ import { Card, CardBody, CardHeader, Pill, StatCard, StatusDot } from '@/compone
 const ABSOLUTE_RULES = [
   { n: 1, name: '동일 인물 7턴 초과 금지', detail: 'currentPersonTurnCount 모니터링 (보물 시 10턴)' },
   { n: 2, name: '거부 2회 연속 → 완전 전환', detail: 'consecutiveRefusals + AI action=transition 확인' },
-  { n: 3, name: '체감 반복 즉시 전환', detail: 'emotionStructureCount ≤ 3 + 어르신 "또?" 반응' },
+  { n: 3, name: '체감 반복 즉시 전환', detail: 'emotionStructureCount ≤ 3 + 회원님 "또?" 반응' },
   { n: 4, name: '동일 인생 시기 8턴 초과 금지', detail: 'lifePeriodTurnCount 모니터링' },
   { n: 5, name: '엔진 action 제한 준수', detail: 'allowedActions 강제 — 엔진 레벨' },
   { n: 6, name: '사망 부모 현재형 질문 금지', detail: 'familyStatus.alive=false 대조 — 신뢰 직격탄' },

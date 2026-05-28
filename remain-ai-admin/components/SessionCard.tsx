@@ -1,7 +1,7 @@
 'use client';
 
 import type { LiveSession } from '@/lib/live-sessions';
-import { cognitiveLabel, phaseLabel, sessionTone } from '@/lib/live-sessions';
+import { alertLevelLabel, cognitiveLabel, depthLabel, phaseLabel, riskLabel, sessionTone } from '@/lib/live-sessions';
 
 const TONE_RING = {
   critical: 'ring-red-200 hover:ring-red-300',
@@ -66,7 +66,7 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
   return (
     <button
       onClick={() => onSelect(session)}
-      aria-label={`${session.elderly.name} 어르신 세션 상세 보기`}
+      aria-label={`${session.elderly.name} 회원님 세션 상세 보기`}
       className={`
         relative text-left
         rounded-2xl bg-white
@@ -100,7 +100,7 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
           </div>
         </div>
         <span className={`shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ring-1 ring-inset ${RISK_PILL[session.riskLevel]}`}>
-          {session.riskLevel}
+          {riskLabel(session.riskLevel)}
         </span>
       </div>
 
@@ -128,26 +128,26 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
           {phaseLabel(session.sessionPhase)}
         </span>
         <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200">
-          L{session.depthLevel}
+          {depthLabel(session.depthLevel)} 이야기
         </span>
         {session.treasureDetected && (
           <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-violet-50 text-violet-700 ring-1 ring-inset ring-violet-200">
-            보물
+            깊은 이야기
           </span>
         )}
         {session.consecutiveRefusals >= 3 && (
           <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200">
-            거부 {session.consecutiveRefusals}
+            짧은 답 {session.consecutiveRefusals}회
           </span>
         )}
         {session.ruleViolationsActive > 0 && (
           <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 ring-1 ring-inset ring-red-200">
-            규칙 {session.ruleViolationsActive}
+            응대 점검 {session.ruleViolationsActive}
           </span>
         )}
         {session.alerts.length > 0 && (
           <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800 ring-1 ring-inset ring-red-200">
-            ⚠ Level {session.alerts[0].level}
+            ⚠ {alertLevelLabel(session.alerts[0].level)}
           </span>
         )}
       </div>
@@ -163,7 +163,7 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
       {session.recent && (
         <div className="mt-2 text-[12px] text-slate-500 leading-relaxed word-keep-all line-clamp-2">
           <span className={`mr-1 font-semibold ${session.recent.role === 'elderly' ? 'text-slate-700' : 'text-blue-700'}`}>
-            {session.recent.role === 'elderly' ? '어르신' : 'AI'}:
+            {session.recent.role === 'elderly' ? '회원님' : 'AI'}:
           </span>
           {session.recent.text}
         </div>

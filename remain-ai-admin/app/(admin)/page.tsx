@@ -13,8 +13,8 @@ export default function HomePage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
         <StatCard label="진행 중 세션" value={0} hint="실시간 모니터링" />
         <StatCard label="오늘 완료" value={0} hint="세션 종료 후 후처리 포함" />
-        <StatCard label="활성 어르신" value={0} hint="최근 30일 1회 이상" />
-        <StatCard label="위기 알림" value={0} hint="Level B/C — 검토 필요" tone="critical" />
+        <StatCard label="활성 회원" value={0} hint="최근 30일 1회 이상" />
+        <StatCard label="위기 알림" value={0} hint="긴급·주의 신호 — 검토 필요" tone="critical" />
       </div>
 
       {/* 최근 활동 + AI 품질 요약 */}

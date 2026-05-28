@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { MOCK_MEMBERS, type Member, cognitiveBadge, timeAgoKo } from '@/lib/members';
+import { type Member, cognitiveBadge, timeAgoKo } from '@/lib/members';
 import { Pill } from './Card';
 
 type Step = 'pick' | 'link';
 
 function generateSessionId(): string {
-  // 클라이언트 mock — 실제로는 백엔드가 토큰 발급
+  // 백엔드 연결 전 임시 ID — 실제로는 서버에서 토큰 발급
   const rand = Math.random().toString(36).slice(2, 8);
   const ts = Date.now().toString(36);
   return `s_${ts}${rand}`;
@@ -16,9 +16,11 @@ function generateSessionId(): string {
 export default function NewSessionDialog({
   open,
   onClose,
+  members,
 }: {
   open: boolean;
   onClose: () => void;
+  members: Member[];
 }) {
   const [step, setStep] = useState<Step>('pick');
   const [query, setQuery] = useState('');
@@ -43,14 +45,14 @@ export default function NewSessionDialog({
 
   const filtered = useMemo(() => {
     const q = query.trim();
-    if (!q) return MOCK_MEMBERS;
-    return MOCK_MEMBERS.filter(
+    if (!q) return members;
+    return members.filter(
       (m) =>
         m.name.includes(q) ||
         m.facility.includes(q) ||
         (m.guardianName ?? '').includes(q),
     );
-  }, [query]);
+  }, [query, members]);
 
   if (!open) return null;
 
@@ -106,7 +108,7 @@ export default function NewSessionDialog({
             </div>
             <div className="text-[12px] text-slate-400 mt-0.5">
               {step === 'pick'
-                ? '대화할 어르신을 선택하면 고유 링크가 만들어져요'
+                ? '대화할 회원님을 선택하면 고유 링크가 만들어져요'
                 : '이 링크로 접속하면 바로 대화가 시작돼요'}
             </div>
           </div>
@@ -139,7 +141,7 @@ export default function NewSessionDialog({
                 "
               />
               <div className="mt-2 text-[11px] text-slate-400">
-                총 {filtered.length}명 · 진행 중 표시된 어르신은 새 세션 시작 시 기존 세션 종료
+                총 {filtered.length}명 · 진행 중 표시된 회원님은 새 세션 시작 시 기존 세션 종료
               </div>
             </div>
 

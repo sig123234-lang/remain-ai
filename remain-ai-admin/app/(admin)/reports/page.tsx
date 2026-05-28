@@ -1,77 +1,64 @@
 import PageHeader from '@/components/PageHeader';
 import { Card, CardBody, CardHeader, EmptyState, Pill } from '@/components/Card';
+import type { GuardianReport } from '@/lib/guardian-reports';
 
 export default function ReportsPage() {
+  // 백엔드 연결 전 — 리포트는 세션 종료 후 자동 생성됨. 지금은 비어있음.
+  const reports: GuardianReport[] = [];
+  const drafts = reports.filter((r) => r.status !== 'sent');
+  const sent   = reports.filter((r) => r.status === 'sent');
+
   return (
     <div className="animate-fade-in">
       <PageHeader
         title="리포트"
-        description="보호자 리포트와 어르신별 종단 추이를 확인합니다."
+        description="세션이 끝나면 보호자용 리포트가 자동으로 만들어져요. 검토 후 발송하세요."
       />
 
-      {/* 탭 영역 */}
-      <Card className="px-4 py-3">
-        <div className="flex gap-2">
-          <button className="px-3 py-2 rounded-lg bg-slate-900 text-white text-[13px] font-semibold">
-            보호자 리포트
-          </button>
-          <button className="px-3 py-2 rounded-lg bg-slate-50 ring-1 ring-slate-100 text-[13px] font-medium text-slate-600">
-            종단 추이
-          </button>
-          <button className="px-3 py-2 rounded-lg bg-slate-50 ring-1 ring-slate-100 text-[13px] font-medium text-slate-600">
-            세션 상세
-          </button>
-        </div>
+      {/* 통계 */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+        <Card className="px-4 py-4">
+          <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold">검토 대기</div>
+          <div className="mt-2 text-[24px] font-bold text-amber-600 tabular-nums">{drafts.length}</div>
+        </Card>
+        <Card className="px-4 py-4">
+          <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold">발송됨</div>
+          <div className="mt-2 text-[24px] font-bold text-emerald-600 tabular-nums">{sent.length}</div>
+        </Card>
+        <Card className="px-4 py-4">
+          <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold">이번 주 생성</div>
+          <div className="mt-2 text-[24px] font-bold text-slate-900 tabular-nums">{reports.length}</div>
+        </Card>
+        <Card className="px-4 py-4">
+          <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400 font-semibold">기억 이미지</div>
+          <div className="mt-2 text-[24px] font-bold text-slate-900 tabular-nums">0</div>
+        </Card>
+      </div>
+
+      <Card className="mb-6">
+        <CardHeader
+          title="검토 대기"
+          description="발송 전에 회원님 발화 인용, 기억 이미지, 민감 정보 누락 여부를 한 번 더 확인하세요"
+          action={<Pill tone="warning">{drafts.length}</Pill>}
+        />
+        <CardBody>
+          <EmptyState
+            title="아직 생성된 리포트가 없어요"
+            hint="세션이 종료되면 자동으로 만들어집니다"
+          />
+        </CardBody>
       </Card>
 
-      {/* 보호자 리포트 리스트 */}
-      <div className="mt-6">
-        <Card>
-          <CardHeader
-            title="보호자 리포트"
-            description="세션 종료 후 자동 생성 — header / overview / impressiveExcerpts / emotionalStateScore"
-            action={<Pill>0개</Pill>}
-          />
-          <CardBody>
-            <EmptyState
-              title="아직 생성된 리포트가 없어요"
-              hint="세션 종료 → 세션기록(v5) → 보호자 리포트(v3) 파이프라인 통과 후 표시됩니다"
-            />
-          </CardBody>
-        </Card>
-      </div>
-
-      {/* 리포트 카드 미리보기 */}
-      <div className="mt-6">
-        <Card className="border-dashed border-slate-200">
-          <CardHeader title="리포트 카드 미리보기" action={<Pill tone="info">예시</Pill>} />
-          <CardBody>
-            <div className="rounded-xl bg-slate-50 p-5">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <div className="text-[15px] font-semibold text-slate-900">이화상 어르신 · 3회차</div>
-                  <div className="text-[12px] text-slate-400 mt-0.5">2026-05-26 · 23분 · 보호자: 민수님 (아들)</div>
-                </div>
-                <Pill tone="success">전송 완료</Pill>
-              </div>
-              <div className="grid grid-cols-3 gap-3 text-center pt-3 border-t border-slate-200/70">
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">감정 점수</div>
-                  <div className="mt-1 text-[18px] font-bold text-emerald-600 tabular-nums">72</div>
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">발췌</div>
-                  <div className="mt-1 text-[18px] font-bold text-slate-800 tabular-nums">2</div>
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">기억 이미지</div>
-                  <div className="mt-1 text-[18px] font-bold text-slate-800 tabular-nums">1</div>
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader
+          title="발송됨"
+          description="보호자에게 전달된 리포트"
+          action={<Pill tone="success">{sent.length}</Pill>}
+        />
+        <CardBody>
+          <EmptyState title="아직 발송된 리포트가 없어요" />
+        </CardBody>
+      </Card>
     </div>
   );
 }

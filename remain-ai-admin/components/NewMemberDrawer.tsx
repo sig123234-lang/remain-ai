@@ -1,36 +1,61 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { AliveStatus, ConsentStatus, FamilyStatus, Member } from '@/lib/members';
-import { FACILITIES, GUARDIAN_RELATIONS } from '@/lib/members';
+import type { AliveStatus, ConsentStatus, FamilyStatus } from '@/lib/members';
+import { GUARDIAN_RELATIONS } from '@/lib/members';
 import type { CognitiveLevel } from '@/lib/live-sessions';
+import type { Facility } from '@/lib/facilities';
+
+export interface NewMemberInput {
+  name: string;
+  age: number;
+  cognitiveLevel: CognitiveLevel;
+  facilityId: string;
+  guardianName: string;
+  guardianRelation: string;
+  guardianPhone?: string;
+  guardianEmail?: string;
+  kakaoChannelLinked: boolean;
+  familyStatus: FamilyStatus;
+  tabooTopics: string[];
+  consent: ConsentStatus;
+}
+
+export interface NewMemberSubmitResult {
+  ok: boolean;
+  error?: string;
+}
 
 interface FormState {
   name: string;
   age: string;
   cognitiveLevel: CognitiveLevel;
-  facility: string;
+  facilityId: string;
   guardianName: string;
   guardianRelation: string;
+  guardianPhone: string;
+  guardianEmail: string;
+  kakaoChannelLinked: boolean;
   family: FamilyStatus;
   taboo: string;
   consent: ConsentStatus;
 }
 
-const INITIAL_FORM: FormState = {
-  name: '',
-  age: '',
-  cognitiveLevel: 'normal',
-  facility: FACILITIES[0],
-  guardianName: '',
-  guardianRelation: GUARDIAN_RELATIONS[0],
-  family: { father: 'unknown', mother: 'unknown', spouse: 'unknown' },
-  taboo: '',
-  consent: { L1: true, L2: true, L3: true, L4: false, L5: true, L6: false },
-};
-
-function generateId(): string {
-  return 'M-' + Date.now().toString(36).slice(-4).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
+function makeInitialForm(defaultFacilityId: string): FormState {
+  return {
+    name: '',
+    age: '',
+    cognitiveLevel: 'normal',
+    facilityId: defaultFacilityId,
+    guardianName: '',
+    guardianRelation: GUARDIAN_RELATIONS[0],
+    guardianPhone: '',
+    guardianEmail: '',
+    kakaoChannelLinked: false,
+    family: { father: 'unknown', mother: 'unknown', spouse: 'unknown' },
+    taboo: '',
+    consent: { L1: true, L2: true, L3: true, L4: false, L5: true, L6: false },
+  };
 }
 
 // ─────────────────────────────────────────────
@@ -100,32 +125,37 @@ export default function NewMemberDrawer({
   open,
   onClose,
   onSubmit,
+  facilities,
 }: {
   open: boolean;
   onClose: () => void;
-  onSubmit: (member: Member) => void;
+  onSubmit: (input: NewMemberInput) => Promise<NewMemberSubmitResult>;
+  facilities: Facility[];
 }) {
-  const [form, setForm] = useState<FormState>(INITIAL_FORM);
+  const defaultFacilityId = facilities[0]?.id ?? '';
+  const [form, setForm] = useState<FormState>(() => makeInitialForm(defaultFacilityId));
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) return;
-    setForm(INITIAL_FORM);
+    setForm(makeInitialForm(defaultFacilityId));
     setError(null);
+    setSubmitting(false);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open, onClose, defaultFacilityId]);
 
   if (!open) return null;
 
   function validate(): string | null {
     if (!form.name.trim()) return '이름을 입력해 주세요.';
     const ageNum = Number(form.age);
-    if (!ageNum || ageNum < 50 || ageNum > 120) return '나이를 50~120 사이로 입력해 주세요.';
-    if (!form.facility) return '시설을 선택해 주세요.';
+    if (!ageNum || ageNum < 20 || ageNum > 120) return '나이를 20~120 사이로 입력해 주세요.';
+    if (!form.facilityId) return '시설을 선택해 주세요.';
     if (!form.guardianName.trim()) return '보호자 이름을 입력해 주세요.';
     if (!form.consent.L1 || !form.consent.L2 || !form.consent.L3) {
       return '세션 운영을 위해 L1~L3 동의는 필수입니다.';
@@ -133,7 +163,7 @@ export default function NewMemberDrawer({
     return null;
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const err = validate();
     if (err) {
       setError(err);
@@ -144,21 +174,34 @@ export default function NewMemberDrawer({
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const newMember: Member = {
-      id: generateId(),
+    const input: NewMemberInput = {
       name: form.name.trim(),
       age: Number(form.age),
       cognitiveLevel: form.cognitiveLevel,
-      facility: form.facility,
-      sessionCount: 0,
+      facilityId: form.facilityId,
       guardianName: form.guardianName.trim(),
       guardianRelation: form.guardianRelation,
+      guardianPhone: form.guardianPhone.trim() || undefined,
+      guardianEmail: form.guardianEmail.trim() || undefined,
+      kakaoChannelLinked: form.kakaoChannelLinked,
       familyStatus: form.family,
-      tabooTopics: tabooArr.length > 0 ? tabooArr : undefined,
+      tabooTopics: tabooArr,
       consent: form.consent,
-      registeredAt: new Date().toISOString(),
     };
-    onSubmit(newMember);
+
+    setError(null);
+    setSubmitting(true);
+    try {
+      const result = await onSubmit(input);
+      if (!result.ok) {
+        setError(result.error ?? '등록 실패');
+      }
+      // 성공 시 부모가 닫음. 실패면 그대로 두고 에러만 표시.
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '등록 실패');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -170,7 +213,7 @@ export default function NewMemberDrawer({
       />
       <aside
         role="dialog"
-        aria-label="새 어르신 등록"
+        aria-label="새 회원님 등록"
         className="
           fixed top-0 right-0 bottom-0 z-50
           w-full sm:w-[520px] max-w-[100vw]
@@ -183,7 +226,7 @@ export default function NewMemberDrawer({
         {/* 헤더 */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between gap-3">
           <div>
-            <div className="text-[18px] font-bold text-slate-900 tracking-tight">새 어르신 등록</div>
+            <div className="text-[18px] font-bold text-slate-900 tracking-tight">새 회원님 등록</div>
             <div className="text-[12px] text-slate-400 mt-0.5">필수 항목을 채우면 즉시 등록됩니다.</div>
           </div>
           <button
@@ -222,7 +265,7 @@ export default function NewMemberDrawer({
                   value={form.age}
                   onChange={(e) => setForm({ ...form, age: e.target.value })}
                   placeholder="82"
-                  min={50}
+                  min={20}
                   max={120}
                   className={inputCls}
                 />
@@ -241,15 +284,21 @@ export default function NewMemberDrawer({
               </div>
               <div className="col-span-2">
                 <FieldLabel required>시설</FieldLabel>
-                <select
-                  value={form.facility}
-                  onChange={(e) => setForm({ ...form, facility: e.target.value })}
-                  className={inputCls}
-                >
-                  {FACILITIES.map((f) => (
-                    <option key={f} value={f}>{f}</option>
-                  ))}
-                </select>
+                {facilities.length === 0 ? (
+                  <div className="px-3 py-2.5 rounded-xl bg-amber-50 ring-1 ring-amber-200 text-[12px] text-amber-800">
+                    등록된 시설이 없어요. 먼저 <a href="/facilities" className="font-semibold underline">시설 관리</a>에서 등록해 주세요.
+                  </div>
+                ) : (
+                  <select
+                    value={form.facilityId}
+                    onChange={(e) => setForm({ ...form, facilityId: e.target.value })}
+                    className={inputCls}
+                  >
+                    {facilities.map((f) => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
           </section>
@@ -280,9 +329,39 @@ export default function NewMemberDrawer({
                   ))}
                 </select>
               </div>
+              <div className="col-span-2 sm:col-span-1">
+                <FieldLabel>휴대폰</FieldLabel>
+                <input
+                  type="tel"
+                  value={form.guardianPhone}
+                  onChange={(e) => setForm({ ...form, guardianPhone: e.target.value })}
+                  placeholder="010-0000-0000"
+                  className={inputCls}
+                />
+              </div>
+              <div className="col-span-2 sm:col-span-1">
+                <FieldLabel>이메일</FieldLabel>
+                <input
+                  type="email"
+                  value={form.guardianEmail}
+                  onChange={(e) => setForm({ ...form, guardianEmail: e.target.value })}
+                  placeholder="optional@example.com"
+                  className={inputCls}
+                />
+              </div>
             </div>
+            <label className="mt-3 flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.kakaoChannelLinked}
+                onChange={(e) => setForm({ ...form, kakaoChannelLinked: e.target.checked })}
+                className="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+              />
+              <span className="text-[12px] text-slate-700">remAIn 카카오 채널 친구로 추가됨</span>
+              <span className="text-[10px] text-slate-400">(이미지 포함 친구톡 가능)</span>
+            </label>
             <p className="mt-2 text-[11px] text-slate-400">
-              리포트 발송 대상이 됩니다. 미입력 시 리포트 생성 불가.
+              리포트 발송 대상이 됩니다. 휴대폰은 카카오 알림톡 / SMS, 이메일은 이메일 발송에 사용됩니다.
             </p>
           </section>
 
@@ -377,16 +456,18 @@ export default function NewMemberDrawer({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition"
+                disabled={submitting}
+                className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] disabled:opacity-60 transition"
               >
                 취소
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:scale-[0.99] transition"
+                disabled={submitting}
+                className="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:scale-[0.99] disabled:opacity-60 transition"
               >
-                등록
+                {submitting ? '등록 중…' : '등록'}
               </button>
             </div>
           </div>

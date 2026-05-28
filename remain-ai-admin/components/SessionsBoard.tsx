@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { LiveSession, RiskLevel, SessionPhase } from '@/lib/live-sessions';
-import { sessionTone, triageScore } from '@/lib/live-sessions';
+import type { LiveSession } from '@/lib/live-sessions';
+import { alertLevelLabel, depthLabel, phaseLabel, riskLabel, sessionTone, triageScore } from '@/lib/live-sessions';
 import SessionCard from './SessionCard';
 import SessionDetailDrawer from './SessionDetailDrawer';
 import CriticalAlertCard from './CriticalAlertCard';
@@ -78,10 +78,10 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
     <div className="animate-fade-in">
       {/* KPI 스트립 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-        <StatCard label="진행 중" value={counts.live} hint="후처리 제외" />
-        <StatCard label="위기" value={counts.critical} hint="Level B/C · 규칙위반 · risk=high" tone="critical" />
-        <StatCard label="주의" value={counts.warning} hint="medium · 거부3+ · 캡임박" tone="warning" />
-        <StatCard label="후처리 대기" value={counts.post} hint="세션기록 / 보호자 리포트" tone="info" />
+        <StatCard label="진행 중" value={counts.live} hint="정리 중 제외" />
+        <StatCard label="긴급" value={counts.critical} hint="위기 신호 · 응대 점검 · 위험 높음" tone="critical" />
+        <StatCard label="주의" value={counts.warning} hint="주의 신호 · 짧은 답 잦음 · 시간 임박" tone="warning" />
+        <StatCard label="정리 중" value={counts.post} hint="세션 기록 · 보호자 리포트 생성" tone="info" />
       </div>
 
       {/* 위기 핀 */}
@@ -93,7 +93,7 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
               <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">즉시 대응 필요</h2>
               <Pill tone="critical">{criticalSessions.length}건</Pill>
             </div>
-            <span className="text-[11px] text-slate-400 tracking-wide">자해 언급 · 타인 위협 · 위급 신호</span>
+            <span className="text-[11px] text-slate-400 tracking-wide">자해 언급 · 타인 위협 · 위기 신호</span>
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
             {criticalSessions.map(s => (
@@ -200,8 +200,8 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
         <div className="mt-8">
           <Card>
             <CardHeader
-              title="후처리 대기"
-              description="세션 종료 후 세션기록(v5) + 보호자 리포트(v3) 생성 큐"
+              title="정리 중인 세션"
+              description="세션 종료 후 기록·보호자 리포트 생성 중"
               action={<Pill tone="info">{postProcessing.length}</Pill>}
             />
             <CardBody>
@@ -217,10 +217,10 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
                           {s.elderly.name} <span className="font-normal text-slate-400">· {s.facility}</span>
                         </div>
                         <div className="text-[11px] text-slate-400 mt-0.5">
-                          {s.elapsedMinutes}분 · 턴 {s.turnCount} · L{s.depthLevel}{s.treasureDetected ? ' · 보물' : ''}
+                          {s.elapsedMinutes}분 · 대화 {s.turnCount}회 · {depthLabel(s.depthLevel)} 이야기까지{s.treasureDetected ? ' · 깊은 이야기' : ''}
                         </div>
                       </div>
-                      <Pill tone="info">처리 중</Pill>
+                      <Pill tone="info">생성 중</Pill>
                     </button>
                   </li>
                 ))}
@@ -247,13 +247,13 @@ function ListView({ sessions, onSelect }: { sessions: LiveSession[]; onSelect: (
           <thead>
             <tr className="text-left text-slate-400 uppercase tracking-wider text-[10px] font-semibold border-b border-slate-100">
               <th className="py-3 px-3">상태</th>
-              <th className="py-3 px-3">어르신</th>
+              <th className="py-3 px-3">회원님</th>
               <th className="py-3 px-3 hidden md:table-cell">시설</th>
               <th className="py-3 px-3">경과</th>
-              <th className="py-3 px-3">턴</th>
-              <th className="py-3 px-3 hidden md:table-cell">phase</th>
-              <th className="py-3 px-3 hidden md:table-cell">depth</th>
-              <th className="py-3 px-3">risk</th>
+              <th className="py-3 px-3">대화</th>
+              <th className="py-3 px-3 hidden md:table-cell">단계</th>
+              <th className="py-3 px-3 hidden md:table-cell">깊이</th>
+              <th className="py-3 px-3">위험도</th>
               <th className="py-3 px-3 hidden lg:table-cell">주제</th>
               <th className="py-3 px-3">알림</th>
             </tr>
@@ -279,20 +279,20 @@ function ListView({ sessions, onSelect }: { sessions: LiveSession[]; onSelect: (
                   <td className="py-2.5 px-3 hidden md:table-cell text-slate-500">{s.facility}</td>
                   <td className="py-2.5 px-3 tabular-nums text-slate-700">{s.elapsedMinutes}분</td>
                   <td className="py-2.5 px-3 tabular-nums text-slate-700">{s.turnCount}/{s.hardCapTurns}</td>
-                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700">{s.sessionPhase}</td>
-                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700">L{s.depthLevel}</td>
+                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700">{phaseLabel(s.sessionPhase)}</td>
+                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700">{depthLabel(s.depthLevel)}</td>
                   <td className="py-2.5 px-3">
-                    <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${riskBg}`}>{s.riskLevel}</span>
+                    <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${riskBg}`}>{riskLabel(s.riskLevel)}</span>
                   </td>
                   <td className="py-2.5 px-3 hidden lg:table-cell text-slate-500 max-w-[220px] truncate">{s.currentTopic ?? '-'}</td>
                   <td className="py-2.5 px-3">
                     {s.alerts.length > 0 ? (
                       <span className="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800 ring-1 ring-inset ring-red-200">
-                        ⚠ {s.alerts[0].level}
+                        ⚠ {alertLevelLabel(s.alerts[0].level)}
                       </span>
                     ) : s.ruleViolationsActive > 0 ? (
                       <span className="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 ring-1 ring-inset ring-red-200">
-                        규칙 {s.ruleViolationsActive}
+                        응대 점검 {s.ruleViolationsActive}
                       </span>
                     ) : (
                       <span className="text-slate-300">·</span>

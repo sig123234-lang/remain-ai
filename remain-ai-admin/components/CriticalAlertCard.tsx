@@ -1,6 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import type { LiveSession } from '@/lib/live-sessions';
+import { alertLevelLabel } from '@/lib/live-sessions';
 
 export default function CriticalAlertCard({ session, onSelect }: { session: LiveSession; onSelect: (s: LiveSession) => void }) {
   const topAlert = session.alerts[0];
@@ -30,14 +32,14 @@ export default function CriticalAlertCard({ session, onSelect }: { session: Live
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-600 text-white tracking-wide">
-                LEVEL {topAlert?.level ?? 'B'}
+                {topAlert ? alertLevelLabel(topAlert.level) : '주의'}
               </span>
               <span className="text-[11px] text-red-700 font-semibold tracking-wide tabular-nums">
                 {session.elapsedMinutes}분째 진행 중
               </span>
             </div>
             <div className="text-[16px] sm:text-[17px] font-bold text-slate-900 truncate">
-              {session.elderly.name} 어르신 — {topAlert?.kind ?? '위기 신호 감지'}
+              {session.elderly.name} 회원님 — {topAlert?.kind ?? '위기 신호 감지'}
             </div>
             <div className="text-[12px] text-slate-500 mt-0.5 truncate">
               {session.facility} · {session.elderly.age}세 · {session.elderly.sessionNumber}회차
@@ -45,7 +47,7 @@ export default function CriticalAlertCard({ session, onSelect }: { session: Live
             {session.recent && (
               <div className="mt-2 text-[13px] text-slate-700 leading-relaxed word-keep-all line-clamp-2">
                 <span className="font-semibold text-slate-900 mr-1">
-                  {session.recent.role === 'elderly' ? '어르신' : 'AI'}:
+                  {session.recent.role === 'elderly' ? '회원님' : 'AI'}:
                 </span>
                 {session.recent.text}
               </div>
@@ -54,12 +56,12 @@ export default function CriticalAlertCard({ session, onSelect }: { session: Live
         </div>
 
         <div className="flex gap-2 sm:flex-col sm:w-auto w-full">
-          <button
-            onClick={() => onSelect(session)}
-            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:scale-[0.99] transition whitespace-nowrap"
+          <Link
+            href={`/sessions/${session.id}`}
+            className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-slate-900 text-white text-[13px] font-semibold hover:bg-slate-800 active:scale-[0.99] transition whitespace-nowrap text-center"
           >
             지금 청취
-          </button>
+          </Link>
           <button
             onClick={() => onSelect(session)}
             className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-red-600 text-white text-[13px] font-semibold hover:bg-red-700 active:scale-[0.99] transition whitespace-nowrap"

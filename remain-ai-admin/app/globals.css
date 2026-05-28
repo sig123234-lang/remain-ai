@@ -2,6 +2,9 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 @import "tailwindcss";
 
+/* 클래스 기반 다크모드 — <html class="dark"> 토글로 적용 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --font-sans: 'Pretendard', 'Apple SD Gothic Neo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
@@ -20,6 +23,13 @@ body {
   text-rendering: optimizeLegibility;
   color: #0f172a; /* slate-900 */
   background: #f8fafc; /* slate-50 — admin canvas */
+}
+
+html.dark,
+html.dark body {
+  color: #e2e8f0; /* slate-200 */
+  background: #020617; /* slate-950 */
+  color-scheme: dark;
 }
 
 /* iOS Safe Area */
@@ -87,3 +97,66 @@ body {
 .animate-pulse-soft  { animation: pulse-soft 2.4s ease-in-out infinite; }
 .animate-spin-orb    { animation: spin-orb 28s linear infinite; }
 .animate-drift       { animation: drift 14s ease-in-out infinite; }
+
+/* ─────────────────────────────────────────────
+   인쇄 / PDF 추출 — 리포트 상세 페이지가 깔끔하게 출력되도록
+   ───────────────────────────────────────────── */
+@media print {
+  /* 색상 인쇄 강제 */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* 인쇄 시 다크모드 무효화 — 보호자 리포트는 항상 라이트 */
+  html.dark, html.dark body { background: #ffffff !important; color: #0f172a !important; }
+  body { background: #ffffff !important; }
+
+  /* AdminShell 사이드바 / 모바일 헤더 / 드로어 숨김 */
+  aside, header, .no-print, nav[aria-label="메인 네비게이션"] {
+    display: none !important;
+  }
+
+  /* 메인 콘텐츠 영역 — 데스크탑 패딩 해제, 인쇄 여백만 */
+  main {
+    padding: 0 !important;
+  }
+  .lg\:pl-64, .lg\:pl-60, .xl\:pl-64 {
+    padding-left: 0 !important;
+  }
+  main > div {
+    padding: 16mm !important;
+    min-height: auto !important;
+  }
+
+  /* 카드 분할 시 페이지 잘리지 않게 */
+  .rounded-2xl, [class*="rounded"] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* 그림자 약화 */
+  [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  /* details — 운영자용 영문 프롬프트는 펼치지 않은 상태로 유지하되 보이게 (펼침 토글 자체는 숨김) */
+  details summary { display: none !important; }
+
+  /* 페이지 여백 */
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+}
+
+/* 청취 페이지 — 라이브 인디케이터 웨이브 */
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.4); }
+  50%      { transform: scaleY(1); }
+}
+.animate-wave {
+  animation: wave 0.9s ease-in-out infinite;
+  transform-origin: center;
+}

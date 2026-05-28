@@ -1,6 +1,6 @@
 /**
- * 실시간 세션 데이터 타입 + mock.
- * 백엔드 연결 전까지 UI 데모용 목업을 제공한다.
+ * 실시간 세션 데이터 타입.
+ * 백엔드 연결 전 단계 — 실제 데이터는 sessions/conversation_turns 테이블에서 옴.
  */
 
 export type CognitiveLevel = 'normal' | 'MCI' | 'moderate';
@@ -18,6 +18,16 @@ export interface RecentUtterance {
   role: 'ai' | 'elderly';
   text: string;
   at: string; // ISO
+}
+
+export interface MentionedPerson {
+  name: string;
+  relation: string;
+  aliveStatus: 'alive' | 'deceased' | 'unknown';
+}
+export interface MentionedPlace {
+  name: string;
+  period?: string;
 }
 
 export interface LiveSession {
@@ -44,6 +54,19 @@ export interface LiveSession {
   alerts: LiveSessionAlert[];
   ruleViolationsActive: number;
   recent?: RecentUtterance;
+  /** 청취 페이지용 — 최근 6~10턴 (실제로는 백엔드에서 스트림) */
+  recentTurns?: RecentUtterance[];
+  /** 누적 엔티티 */
+  mentionedPeople?: MentionedPerson[];
+  mentionedPlaces?: MentionedPlace[];
+  mentionedTimeperiods?: string[];
+  /** 현재 발화 중인 측 — 청취 페이지의 라이브 인디케이터용 */
+  speakingNow?: 'ai' | 'elderly' | 'silence';
+}
+
+export function findSessionById(_id: string): LiveSession | undefined {
+  // 백엔드 연결 전 — 항상 undefined. 추후 sessions 테이블 조회로 대체.
+  return undefined;
 }
 
 // ─────────────────────────────────────────────
@@ -92,215 +115,38 @@ export function sessionTone(s: LiveSession): Tone {
 }
 
 export function phaseLabel(p: SessionPhase): string {
-  return ({ main: '진행', wrapup: '마무리', force_end: '강제종료', post_processing: '후처리' } as const)[p];
+  return ({
+    main: '진행 중',
+    wrapup: '마무리 중',
+    force_end: '자동 종료',
+    post_processing: '정리 중',
+  } as const)[p];
 }
 export function cognitiveLabel(c: CognitiveLevel): string {
   return ({ normal: '정상', MCI: 'MCI', moderate: '중등도' } as const)[c];
 }
 
 // ─────────────────────────────────────────────
-//  MOCK — UI 데모용 (백엔드 연결 시 제거 / 대체)
+//  직원용 자연어 워딩 — 내부 코드를 사용자 친화 한국어로
 // ─────────────────────────────────────────────
-const now = Date.now();
-const minsAgo = (m: number) => new Date(now - m * 60_000).toISOString();
 
-export const MOCK_LIVE_SESSIONS: LiveSession[] = [
-  {
-    id: 'S-001',
-    elderly: { name: '이화상', age: 82, cognitiveLevel: 'normal', sessionNumber: 3 },
-    facility: '한울요양원 A동',
-    startedAt: minsAgo(17),
-    elapsedMinutes: 17,
-    turnCount: 14,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'main',
-    depthLevel: 3,
-    riskLevel: 'high',
-    consecutiveRefusals: 0,
-    treasureDetected: true,
-    currentTopic: '아버지 — 어린 시절 식사',
-    currentScene: 'childhood_home_dinner',
-    alerts: [{ level: 'B', kind: '자해 관련 발언 1회', detectedAt: minsAgo(2) }],
-    ruleViolationsActive: 0,
-    recent: { role: 'elderly', text: '요즘은 그냥 빨리 갔으면 좋겠다는 생각이 들어.', at: minsAgo(2) },
-  },
-  {
-    id: 'S-002',
-    elderly: { name: '박순자', age: 78, cognitiveLevel: 'MCI', sessionNumber: 1 },
-    facility: '한울요양원 B동',
-    startedAt: minsAgo(11),
-    elapsedMinutes: 11,
-    turnCount: 8,
-    hardCapTurns: 18,
-    hardCapMinutes: 25,
-    sessionPhase: 'main',
-    depthLevel: 2,
-    riskLevel: 'medium',
-    consecutiveRefusals: 2,
-    treasureDetected: false,
-    currentTopic: '학교 — 통학길',
-    currentScene: 'school_walk',
-    alerts: [],
-    ruleViolationsActive: 0,
-    recent: { role: 'elderly', text: '글쎄… 잘 기억이 안 나네.', at: minsAgo(1) },
-  },
-  {
-    id: 'S-003',
-    elderly: { name: '김영자', age: 89, cognitiveLevel: 'normal', sessionNumber: 7 },
-    facility: '한빛노인복지센터',
-    startedAt: minsAgo(28),
-    elapsedMinutes: 28,
-    turnCount: 24,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'wrapup',
-    depthLevel: 4,
-    riskLevel: 'low',
-    consecutiveRefusals: 0,
-    treasureDetected: true,
-    currentTopic: '결혼 — 신혼',
-    currentScene: 'wedding_day',
-    alerts: [],
-    ruleViolationsActive: 0,
-    recent: { role: 'ai', text: '오늘 좋은 이야기 들려주셔서 감사해요.', at: minsAgo(1) },
-  },
-  {
-    id: 'S-004',
-    elderly: { name: '최정훈', age: 73, cognitiveLevel: 'normal', sessionNumber: 2 },
-    facility: '한울요양원 A동',
-    startedAt: minsAgo(3),
-    elapsedMinutes: 3,
-    turnCount: 3,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'main',
-    depthLevel: 1,
-    riskLevel: 'low',
-    consecutiveRefusals: 0,
-    treasureDetected: false,
-    currentTopic: '어린 시절',
-    currentScene: 'opening',
-    alerts: [],
-    ruleViolationsActive: 0,
-    recent: { role: 'ai', text: '이맘때쯤 되면 어릴 때 뭐 하셨어요?', at: minsAgo(1) },
-  },
-  {
-    id: 'S-005',
-    elderly: { name: '정명숙', age: 85, cognitiveLevel: 'normal', sessionNumber: 5 },
-    facility: '한울요양원 B동',
-    startedAt: minsAgo(14),
-    elapsedMinutes: 14,
-    turnCount: 12,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'main',
-    depthLevel: 2,
-    riskLevel: 'low',
-    consecutiveRefusals: 0,
-    treasureDetected: true,
-    currentTopic: '시장 — 단골 반찬',
-    currentScene: 'market_visit',
-    alerts: [],
-    ruleViolationsActive: 0,
-    recent: { role: 'elderly', text: '거기서만 그 맛이 나더라고. 아직도 그게 떠오르지.', at: minsAgo(1) },
-  },
-  {
-    id: 'S-006',
-    elderly: { name: '김태수', age: 80, cognitiveLevel: 'MCI', sessionNumber: 4 },
-    facility: '한빛노인복지센터',
-    startedAt: minsAgo(9),
-    elapsedMinutes: 9,
-    turnCount: 7,
-    hardCapTurns: 18,
-    hardCapMinutes: 25,
-    sessionPhase: 'main',
-    depthLevel: 2,
-    riskLevel: 'low',
-    consecutiveRefusals: 1,
-    treasureDetected: false,
-    currentTopic: '첫 직장',
-    currentScene: 'first_job',
-    alerts: [],
-    ruleViolationsActive: 0,
-    recent: { role: 'ai', text: '그때 같이 일하던 분 중에 가장 자주 만나신 분은 누구셨어요?', at: minsAgo(1) },
-  },
-  {
-    id: 'S-007',
-    elderly: { name: '윤옥분', age: 77, cognitiveLevel: 'normal', sessionNumber: 6 },
-    facility: '한울요양원 A동',
-    startedAt: minsAgo(22),
-    elapsedMinutes: 22,
-    turnCount: 18,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'main',
-    depthLevel: 3,
-    riskLevel: 'low',
-    consecutiveRefusals: 0,
-    treasureDetected: true,
-    currentTopic: '자녀 — 첫째 아들',
-    currentScene: 'child_birth',
-    alerts: [],
-    ruleViolationsActive: 1, // #6 위반 1건 발생
-    recent: { role: 'ai', text: '아드님 이야기 더 해주시겠어요?', at: minsAgo(1) },
-  },
-  {
-    id: 'S-008',
-    elderly: { name: '강신애', age: 84, cognitiveLevel: 'normal', sessionNumber: 1 },
-    facility: '한울요양원 B동',
-    startedAt: minsAgo(6),
-    elapsedMinutes: 6,
-    turnCount: 5,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'main',
-    depthLevel: 1,
-    riskLevel: 'low',
-    consecutiveRefusals: 0,
-    treasureDetected: false,
-    currentTopic: '오프닝',
-    currentScene: 'opening',
-    alerts: [],
-    ruleViolationsActive: 0,
-    recent: { role: 'elderly', text: '날씨가 좋네요. 봄이 가까운가봐.', at: minsAgo(1) },
-  },
-  {
-    id: 'S-009',
-    elderly: { name: '송미옥', age: 76, cognitiveLevel: 'normal', sessionNumber: 8 },
-    facility: '한빛노인복지센터',
-    startedAt: minsAgo(35),
-    elapsedMinutes: 26,
-    turnCount: 22,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'post_processing',
-    depthLevel: 4,
-    riskLevel: 'low',
-    consecutiveRefusals: 0,
-    treasureDetected: true,
-    currentTopic: '— 종료 —',
-    currentScene: null,
-    alerts: [],
-    ruleViolationsActive: 0,
-  },
-  {
-    id: 'S-010',
-    elderly: { name: '한경수', age: 81, cognitiveLevel: 'normal', sessionNumber: 2 },
-    facility: '한울요양원 A동',
-    startedAt: minsAgo(42),
-    elapsedMinutes: 28,
-    turnCount: 24,
-    hardCapTurns: 25,
-    hardCapMinutes: 30,
-    sessionPhase: 'post_processing',
-    depthLevel: 3,
-    riskLevel: 'low',
-    consecutiveRefusals: 0,
-    treasureDetected: false,
-    currentTopic: '— 종료 —',
-    currentScene: null,
-    alerts: [],
-    ruleViolationsActive: 0,
-  },
-];
+/** risk: high/medium/low → 위험/주의/안정 */
+export function riskLabel(r: RiskLevel): string {
+  return ({ low: '안정', medium: '주의', high: '위험' } as const)[r];
+}
+
+/** depth L1~L4 → 사실/디테일/감정/깊은 마음 */
+export function depthLabel(d: 1 | 2 | 3 | 4): string {
+  return ({ 1: '사실', 2: '디테일', 3: '감정', 4: '깊은 마음' } as const)[d];
+}
+
+/** Level A/B/C → 관찰/주의/긴급 */
+export function alertLevelLabel(a: AlertLevel): string {
+  return ({ A: '관찰', B: '주의', C: '긴급' } as const)[a];
+}
+
+/** alive 상태 → 생존/작고하심/미확인 */
+export function aliveLabel(s: 'alive' | 'deceased' | 'unknown'): string {
+  return ({ alive: '생존', deceased: '작고하심', unknown: '미확인' } as const)[s];
+}
+

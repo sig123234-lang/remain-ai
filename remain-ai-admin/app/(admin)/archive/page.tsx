@@ -6,14 +6,14 @@ export default function ArchivePage() {
     <div className="animate-fade-in">
       <PageHeader
         title="기억 아카이브"
-        description="세션에서 추출된 기억·인물·장소·사건을 어르신별로 모아 봅니다."
+        description="세션에서 추출된 기억·인물·장소·사건을 회원님별로 모아 봅니다."
       />
 
-      {/* 어르신 선택 + 필터 */}
+      {/* 회원님 선택 + 필터 */}
       <Card className="px-4 py-3">
         <div className="flex flex-col sm:flex-row gap-2">
           <select className="flex-1 px-3 py-2 rounded-lg bg-slate-50 ring-1 ring-slate-100 text-[13px] text-slate-700">
-            <option>어르신 선택</option>
+            <option>회원님 선택</option>
           </select>
           <div className="flex gap-2 flex-wrap">
             <button className="px-3 py-2 rounded-lg bg-slate-900 text-white text-[12px] font-semibold">기억</button>
