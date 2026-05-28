@@ -1,9 +1,10 @@
 import { type NextRequest } from 'next/server';
-// 상대 경로 사용 — Vercel Edge runtime이 '@/...' tsconfig alias를
-// middleware 번들에서 풀지 못해서 "unsupported modules" 에러가 남.
 import { updateSession } from './lib/supabase/middleware';
 
-export async function middleware(request: NextRequest) {
+// Next 16: middleware → proxy로 컨벤션 변경. proxy는 기본 Node.js runtime
+// 이라 Edge 제약(예: @supabase/ssr 호환성 이슈) 없이 동작.
+// 내부 함수명·헬퍼 파일명(lib/supabase/middleware.ts)은 그대로 유지.
+export async function proxy(request: NextRequest) {
   return updateSession(request);
 }
 

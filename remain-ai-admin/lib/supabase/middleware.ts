@@ -22,41 +22,47 @@ export async function updateSession(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return response;
 
-  const supabase = createServerClient<Database>(url, key, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
+  // 만에 하나 supabase 호출이 throw해도 proxy 전체가 500 나지 않도록 감싸기.
+  try {
+    const supabase = createServerClient<Database>(url, key, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          );
+        },
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options),
-        );
-      },
-    },
-  });
+    });
 
-  const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
-  const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(p));
-  const isApi = path.startsWith(API_PREFIX);
+    const path = request.nextUrl.pathname;
+    const isPublic = PUBLIC_PATHS.some((p) => path === p || path.startsWith(p));
+    const isApi = path.startsWith(API_PREFIX);
 
-  if (!user && !isPublic && !isApi) {
-    const redirect = request.nextUrl.clone();
-    redirect.pathname = '/login';
-    redirect.searchParams.set('next', path);
-    return NextResponse.redirect(redirect);
+    if (!user && !isPublic && !isApi) {
+      const redirect = request.nextUrl.clone();
+      redirect.pathname = '/login';
+      redirect.searchParams.set('next', path);
+      return NextResponse.redirect(redirect);
+    }
+
+    // 로그인된 상태에서 /login 접근 시 홈으로
+    if (user && path === '/login') {
+      const home = request.nextUrl.clone();
+      home.pathname = '/';
+      home.searchParams.delete('next');
+      return NextResponse.redirect(home);
+    }
+
+    return response;
+  } catch (e) {
+    console.error('[updateSession] supabase error — proxy 통과:', e);
+    return response;
   }
-
-  // 로그인된 상태에서 /login 접근 시 홈으로
-  if (user && path === '/login') {
-    const home = request.nextUrl.clone();
-    home.pathname = '/';
-    home.searchParams.delete('next');
-    return NextResponse.redirect(home);
-  }
-
-  return response;
 }
