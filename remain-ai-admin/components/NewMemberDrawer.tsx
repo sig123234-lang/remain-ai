@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import type { AliveStatus, ConsentStatus, FamilyStatus } from '@/lib/members';
 import { GUARDIAN_RELATIONS } from '@/lib/members';
 import type { CognitiveLevel } from '@/lib/live-sessions';
@@ -286,7 +287,7 @@ export default function NewMemberDrawer({
                 <FieldLabel required>시설</FieldLabel>
                 {facilities.length === 0 ? (
                   <div className="px-3 py-2.5 rounded-xl bg-amber-50 ring-1 ring-amber-200 text-[12px] text-amber-800">
-                    등록된 시설이 없어요. 먼저 <a href="/facilities" className="font-semibold underline">시설 관리</a>에서 등록해 주세요.
+                    등록된 시설이 없어요. 먼저 <Link href="/facilities" className="font-semibold underline">시설 관리</Link>에서 등록해 주세요.
                   </div>
                 ) : (
                   <select

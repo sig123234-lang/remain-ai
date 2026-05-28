@@ -23,7 +23,8 @@ export default function IntegrationsCard({ integrations }: { integrations: Integ
   async function runAnthropicTest() {
     setTest({ status: 'loading' });
     try {
-      const res = await fetch('/api/conversation', {
+      // basePath '/admin' 적용 — next.config.ts와 동기화 필요
+      const res = await fetch('/admin/api/conversation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

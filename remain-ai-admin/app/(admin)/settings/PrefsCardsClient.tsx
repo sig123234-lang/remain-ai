@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { Card, CardBody, CardHeader, Pill } from '@/components/Card';
 import {
   CONSENT_KEYS,
@@ -178,7 +179,7 @@ export default function PrefsCardsClient({
         <div className="rounded-xl bg-amber-50 ring-1 ring-amber-200 dark:bg-amber-950/40 dark:ring-amber-900/60 px-4 py-3 text-[13px] text-amber-800 dark:text-amber-300">
           <div className="font-semibold mb-0.5">시설이 연결되어 있지 않아요</div>
           <div className="text-[12px]">
-            기본값을 저장하려면 먼저 <a href="/facilities" className="underline font-semibold">시설 관리</a>에서 시설을 만들고
+            기본값을 저장하려면 먼저 <Link href="/facilities" className="underline font-semibold">시설 관리</Link>에서 시설을 만들고
             프로필에 연결해 주세요. (지금은 변경해도 저장되지 않습니다)
           </div>
         </div>
