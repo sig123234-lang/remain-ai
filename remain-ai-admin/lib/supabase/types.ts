@@ -23,6 +23,8 @@ export type Database = {
           manager_name: string | null;
           manager_phone: string | null;
           address: string | null;
+          default_consent: { L1: boolean; L2: boolean; L3: boolean; L4: boolean; L5: boolean; L6: boolean };
+          notification_prefs: { crisisEmail: boolean; autoSendReport: boolean; weeklyDigest: boolean; ruleViolationDigest: boolean };
           created_at: string;
         };
         Insert: {
@@ -33,6 +35,8 @@ export type Database = {
           manager_name?: string | null;
           manager_phone?: string | null;
           address?: string | null;
+          default_consent?: { L1: boolean; L2: boolean; L3: boolean; L4: boolean; L5: boolean; L6: boolean };
+          notification_prefs?: { crisisEmail: boolean; autoSendReport: boolean; weeklyDigest: boolean; ruleViolationDigest: boolean };
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['facilities']['Insert']>;
@@ -80,7 +84,26 @@ export type Database = {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['members']['Row'], 'created_at' | 'updated_at'> & {
+        Insert: {
+          // 필수 (DB default 없음)
+          facility_id: string;
+          name: string;
+          age: number;
+          // 선택 (DB default 있음 / nullable)
+          id?: string;
+          cognitive_level?: 'normal' | 'MCI' | 'moderate';
+          guardian_name?: string | null;
+          guardian_relation?: string | null;
+          guardian_phone?: string | null;
+          guardian_email?: string | null;
+          kakao_channel_linked?: boolean;
+          family_status?: { father: string; mother: string; spouse: string } | null;
+          taboo_topics?: string[] | null;
+          consent?: { L1: boolean; L2: boolean; L3: boolean; L4: boolean; L5: boolean; L6: boolean } | null;
+          session_count?: number;
+          last_session_at?: string | null;
+          in_active_session?: boolean;
+          registered_at?: string;
           created_at?: string;
           updated_at?: string;
         };
