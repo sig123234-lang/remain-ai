@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import PageHeader from '@/components/PageHeader';
 import { Card, CardBody, CardHeader, EmptyState, Pill, StatCard, StatusDot } from '@/components/Card';
 
@@ -44,11 +45,11 @@ export default function HomePage() {
                 { rule: '#7 종료 후 질문', count: 0 },
               ].map((r) => (
                 <div key={r.rule} className="flex items-center justify-between text-[13px]">
-                  <div className="flex items-center gap-2 text-slate-600">
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
                     <StatusDot tone={r.count > 0 ? 'critical' : 'success'} />
                     <span>{r.rule}</span>
                   </div>
-                  <span className="text-slate-900 font-semibold tabular-nums">{r.count}</span>
+                  <span className="text-slate-900 font-semibold tabular-nums dark:text-slate-100">{r.count}</span>
                 </div>
               ))}
             </CardBody>
@@ -70,29 +71,29 @@ export default function HomePage() {
                 { label: 'AI 품질 감사', href: '/quality' },
                 { label: '설정', href: '/settings' },
               ].map((q) => (
-                <a
+                <Link
                   key={q.href}
                   href={q.href}
                   className="
-                    px-4 py-3 rounded-xl
-                    bg-slate-50 hover:bg-slate-100
-                    text-[13px] font-medium text-slate-700
-                    transition-colors
-                    flex items-center justify-between gap-2
-                  "
+ px-4 py-3 rounded-xl
+ bg-slate-50 hover:bg-slate-100
+ text-[13px] font-medium text-slate-700
+ transition-colors
+ flex items-center justify-between gap-2 dark:text-slate-300 dark:bg-slate-800/50 dark:hover:bg-slate-800
+ "
                 >
                   {q.label}
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-300" aria-hidden>
                     <path d="M9 6l6 6-6 6" />
                   </svg>
-                </a>
+                </Link>
               ))}
             </div>
           </CardBody>
         </Card>
       </div>
 
-      <div className="mt-6 flex items-center gap-2 text-[12px] text-slate-400">
+      <div className="mt-6 flex items-center gap-2 text-[12px] text-slate-400 dark:text-slate-500">
         <Pill tone="info">개발</Pill>
         <span>실제 데이터는 백엔드 연동 후 표시됩니다.</span>
       </div>

@@ -145,9 +145,16 @@ html.dark body {
   details summary { display: none !important; }
 
   /* 페이지 여백 */
+  /* 브라우저 기본 헤더(페이지 제목)·푸터(URL) 제거.
+     margin: 0이면 브라우저가 자동 헤더/푸터를 생성하지 않음.
+     실제 페이지 여백은 main > div의 padding으로 별도 부여. */
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 0;
+  }
+
+  main > div {
+    padding: 14mm 14mm 14mm 14mm !important;
   }
 }
 

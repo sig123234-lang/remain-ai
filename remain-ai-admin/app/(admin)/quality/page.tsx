@@ -42,19 +42,19 @@ export default function QualityPage() {
             description="모든 규칙보다 우선. 예외 없음. 위반 1건이라도 D 후보."
           />
           <CardBody>
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {ABSOLUTE_RULES.map((r) => (
                 <li key={r.n} className="py-3 flex items-start gap-3">
-                  <div className="grid place-items-center w-8 h-8 rounded-lg bg-slate-50 ring-1 ring-slate-100 text-[13px] font-bold text-slate-700 tabular-nums shrink-0">
+                  <div className="grid place-items-center w-8 h-8 rounded-lg bg-slate-50 ring-1 ring-slate-100 text-[13px] font-bold text-slate-700 tabular-nums shrink-0 dark:text-slate-300 dark:bg-slate-800/50 dark:ring-slate-800">
                     {r.n}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-semibold text-slate-800">{r.name}</div>
-                    <div className="text-[12px] text-slate-400 mt-0.5">{r.detail}</div>
+                    <div className="text-[14px] font-semibold text-slate-800 dark:text-slate-200">{r.name}</div>
+                    <div className="text-[12px] text-slate-400 mt-0.5 dark:text-slate-500">{r.detail}</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <StatusDot tone="success" />
-                    <span className="text-[12px] font-semibold text-slate-600 tabular-nums">0건</span>
+                    <span className="text-[12px] font-semibold text-slate-600 tabular-nums dark:text-slate-400">0건</span>
                   </div>
                 </li>
               ))}
@@ -70,12 +70,12 @@ export default function QualityPage() {
           <CardBody>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {CORE_METRICS.map((m) => (
-                <div key={m.key} className="rounded-xl bg-slate-50 p-4">
+                <div key={m.key} className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
                   <div className="flex items-center justify-between">
-                    <div className="text-[13px] font-semibold text-slate-800">{m.label}</div>
-                    <span className="text-[16px] font-bold tabular-nums text-slate-900">0</span>
+                    <div className="text-[13px] font-semibold text-slate-800 dark:text-slate-200">{m.label}</div>
+                    <span className="text-[16px] font-bold tabular-nums text-slate-900 dark:text-slate-100">0</span>
                   </div>
-                  <div className="text-[11px] text-slate-400 mt-1">{m.detail}</div>
+                  <div className="text-[11px] text-slate-400 mt-1 dark:text-slate-500">{m.detail}</div>
                 </div>
               ))}
             </div>
@@ -94,14 +94,14 @@ export default function QualityPage() {
                 { name: '세션 기록 정리', file: '회상치료_세션기록_실행_프롬프트_v5.md', version: 'v5', date: '2026-05-26' },
                 { name: '보호자 리포트', file: '보호자_리포트_생성_프롬프트_v3.md', version: 'v3', date: '2026-05-26' },
               ].map((p) => (
-                <li key={p.file} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+                <li key={p.file} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
                   <div className="min-w-0">
-                    <div className="text-[13px] font-semibold text-slate-800">{p.name}</div>
-                    <div className="text-[11px] text-slate-400 truncate">{p.file}</div>
+                    <div className="text-[13px] font-semibold text-slate-800 dark:text-slate-200">{p.name}</div>
+                    <div className="text-[11px] text-slate-400 truncate dark:text-slate-500">{p.file}</div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 ml-3">
                     <Pill tone="success">{p.version}</Pill>
-                    <span className="text-[11px] text-slate-400 tabular-nums">{p.date}</span>
+                    <span className="text-[11px] text-slate-400 tabular-nums dark:text-slate-500">{p.date}</span>
                   </div>
                 </li>
               ))}

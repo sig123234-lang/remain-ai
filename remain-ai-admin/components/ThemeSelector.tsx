@@ -43,7 +43,7 @@ export default function ThemeSelector() {
       <div
         role="radiogroup"
         aria-label="화면 테마"
-        className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 ring-1 ring-slate-200 dark:ring-slate-700"
+        className="inline-flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 ring-1 ring-slate-200 dark:ring-slate-700 "
       >
         {OPTIONS.map((opt) => {
           const active = theme === opt.value;
@@ -70,7 +70,7 @@ export default function ThemeSelector() {
         })}
       </div>
       <p className="mt-2 text-[12px] text-slate-400 dark:text-slate-500">
-        현재 적용: <span className="font-semibold text-slate-600 dark:text-slate-300">{resolved === 'dark' ? '다크' : '라이트'}</span>
+        현재 적용: <span className="font-semibold text-slate-600 dark:text-slate-300 ">{resolved === 'dark' ? '다크' : '라이트'}</span>
         {theme === 'system' && <span> · 시스템 설정 따름</span>}
       </p>
     </div>

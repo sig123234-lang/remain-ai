@@ -10,8 +10,9 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import type { Database } from './types';
 
-const PUBLIC_PATHS = ['/login', '/auth', '/r/'];
+const PUBLIC_PATHS = ['/login', '/auth', '/r/', '/session/'];
 // API 경로는 미들웨어에서 리다이렉트하지 않고, 라우트 핸들러가 직접 401 JSON 응답.
+// /api/conversation/voice·greeting은 sessionId 자체로 인증 (admin 로그인 불요).
 const API_PREFIX = '/api/';
 
 export async function updateSession(request: NextRequest) {

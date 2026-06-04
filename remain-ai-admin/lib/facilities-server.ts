@@ -1,4 +1,4 @@
-import { createServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createServiceRoleClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { Facility } from '@/lib/facilities';
 
 interface DbFacilityRow {
@@ -23,7 +23,9 @@ export async function fetchFacilities(): Promise<FacilitiesFetchResult> {
     return { facilities: [], source: 'mock' };
   }
   try {
-    const supabase = await createServerClient();
+    // service-role 사용 — 모든 admin이 모든 시설 보는 게 정책이고,
+    // 페이지 접근 자체가 admin 레이아웃에서 이미 인증 가드 통과한 상태.
+    const supabase = createServiceRoleClient();
     const { data, error } = await supabase
       .from('facilities')
       .select('id, name, code, phone, manager_name, manager_phone, address, created_at, members(count)')

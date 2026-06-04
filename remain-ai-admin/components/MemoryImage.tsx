@@ -341,7 +341,7 @@ export default function MemoryImage({
 
   return (
     <figure className="space-y-3">
-      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden ring-1 ring-slate-100 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.18)]">
+      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden ring-1 ring-slate-100 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.18)] dark:ring-slate-800">
         {imageUrl ? (
           // 백엔드 연결 후 실제 이미지
           // eslint-disable-next-line @next/next/no-img-element
@@ -361,13 +361,13 @@ export default function MemoryImage({
 
             {/* 상단 메타 배지 */}
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/85 backdrop-blur-md ring-1 ring-white/60 text-[10px] font-semibold text-slate-700">
+              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/85 backdrop-blur-md ring-1 ring-white/60 text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="w-3 h-3 text-violet-500" aria-hidden>
                   <path d="M12 2l1.4 4.6L18 8l-4.6 1.4L12 14l-1.4-4.6L6 8l4.6-1.4z" />
                 </svg>
                 AI 생성 이미지
               </span>
-              <span className="inline-flex items-center px-2 py-1 rounded-full bg-white/85 backdrop-blur-md ring-1 ring-white/60 text-[10px] font-semibold text-slate-600">
+              <span className="inline-flex items-center px-2 py-1 rounded-full bg-white/85 backdrop-blur-md ring-1 ring-white/60 text-[10px] font-semibold text-slate-600 dark:text-slate-400">
                 {styleLabel(style)}
               </span>
             </div>

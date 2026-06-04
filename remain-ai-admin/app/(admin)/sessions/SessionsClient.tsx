@@ -1,16 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import PageHeader from '@/components/PageHeader';
 import SessionsBoard from '@/components/SessionsBoard';
 import NewSessionDialog from '@/components/NewSessionDialog';
 import type { LiveSession } from '@/lib/live-sessions';
 import type { Member } from '@/lib/members';
 
-export default function SessionsClient({ members }: { members: Member[] }) {
+export default function SessionsClient({ members, sessions }: { members: Member[]; sessions: LiveSession[] }) {
+  const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
-  // 백엔드 연결 전 — 실시간 세션은 sessions 테이블 + 실시간 스트림에서 옴.
-  const sessions: LiveSession[] = [];
+
+  // 보드 자동 새로고침 — 3초마다 새 세션/턴 카운트/상태 반영
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') router.refresh();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [router]);
 
   return (
     <>
@@ -19,7 +27,7 @@ export default function SessionsClient({ members }: { members: Member[] }) {
         description="여러 세션을 한 화면에서 모니터링합니다. 위험도 높은 세션이 자동으로 위에 표시됩니다."
         actions={
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white ring-1 ring-slate-200 text-[12px] font-semibold text-slate-600">
+            <span className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white ring-1 ring-slate-200 text-[12px] font-semibold text-slate-600 dark:text-slate-400 dark:ring-slate-700">
               <span className="relative inline-flex w-2 h-2">
                 <span className="absolute inset-0 rounded-full bg-emerald-400 animate-ping opacity-75" />
                 <span className="relative inline-flex rounded-full bg-emerald-400 w-2 h-2" />

@@ -90,10 +90,10 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="inline-block w-1 h-5 bg-red-500 rounded-full" aria-hidden />
-              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight">즉시 대응 필요</h2>
+              <h2 className="text-[14px] font-bold text-slate-900 tracking-tight dark:text-slate-100">즉시 대응 필요</h2>
               <Pill tone="critical">{criticalSessions.length}건</Pill>
             </div>
-            <span className="text-[11px] text-slate-400 tracking-wide">자해 언급 · 타인 위협 · 위기 신호</span>
+            <span className="text-[11px] text-slate-400 tracking-wide dark:text-slate-500">자해 언급 · 타인 위협 · 위기 신호</span>
           </div>
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
             {criticalSessions.map(s => (
@@ -105,7 +105,7 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
 
       {/* 필터 / 정렬 바 */}
       <div className="mt-6 flex flex-wrap items-center gap-2 sticky top-0 lg:top-0 z-10 bg-slate-50/80 backdrop-blur-md -mx-2 px-2 py-3 rounded-xl">
-        <div className="flex gap-1 bg-white ring-1 ring-slate-200 rounded-xl p-1">
+        <div className="flex gap-1 bg-white ring-1 ring-slate-200 rounded-xl p-1 dark:ring-slate-700">
           {([
             { id: 'all', label: '전체', count: counts.live },
             { id: 'attention', label: '주목', count: counts.critical + counts.warning },
@@ -128,7 +128,7 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
         <select
           value={facility}
           onChange={(e) => setFacility(e.target.value)}
-          className="px-3 py-2 rounded-xl bg-white ring-1 ring-slate-200 text-[12px] font-medium text-slate-700"
+          className="px-3 py-2 rounded-xl bg-white ring-1 ring-slate-200 text-[12px] font-medium text-slate-700 dark:text-slate-300 dark:ring-slate-700"
         >
           {facilities.map(f => (
             <option key={f} value={f}>{f === 'all' ? '전체 시설' : f}</option>
@@ -138,7 +138,7 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as Sort)}
-          className="px-3 py-2 rounded-xl bg-white ring-1 ring-slate-200 text-[12px] font-medium text-slate-700"
+          className="px-3 py-2 rounded-xl bg-white ring-1 ring-slate-200 text-[12px] font-medium text-slate-700 dark:text-slate-300 dark:ring-slate-700"
         >
           <option value="triage">위험도 높은순</option>
           <option value="elapsed_desc">진행시간 긴순</option>
@@ -146,7 +146,7 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
           <option value="name">이름순</option>
         </select>
 
-        <div className="ml-auto flex gap-1 bg-white ring-1 ring-slate-200 rounded-xl p-1">
+        <div className="ml-auto flex gap-1 bg-white ring-1 ring-slate-200 rounded-xl p-1 dark:ring-slate-700">
           <button
             onClick={() => setView('grid')}
             aria-label="그리드 보기"
@@ -205,18 +205,18 @@ export default function SessionsBoard({ sessions }: { sessions: LiveSession[] })
               action={<Pill tone="info">{postProcessing.length}</Pill>}
             />
             <CardBody>
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                 {postProcessing.map(s => (
                   <li key={s.id}>
                     <button
                       onClick={() => setSelected(s)}
-                      className="w-full flex items-center justify-between gap-3 py-3 hover:bg-slate-50 -mx-2 px-2 rounded-lg transition text-left"
+                      className="w-full flex items-center justify-between gap-3 py-3 hover:bg-slate-50 -mx-2 px-2 rounded-lg transition text-left dark:hover:bg-slate-800/50"
                     >
                       <div className="min-w-0">
-                        <div className="text-[13px] font-semibold text-slate-800 truncate">
-                          {s.elderly.name} <span className="font-normal text-slate-400">· {s.facility}</span>
+                        <div className="text-[13px] font-semibold text-slate-800 truncate dark:text-slate-200">
+                          {s.elderly.name} <span className="font-normal text-slate-400 dark:text-slate-500">· {s.facility}</span>
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">
+                        <div className="text-[11px] text-slate-400 mt-0.5 dark:text-slate-500">
                           {s.elapsedMinutes}분 · 대화 {s.turnCount}회 · {depthLabel(s.depthLevel)} 이야기까지{s.treasureDetected ? ' · 깊은 이야기' : ''}
                         </div>
                       </div>
@@ -245,7 +245,7 @@ function ListView({ sessions, onSelect }: { sessions: LiveSession[]; onSelect: (
       <div className="overflow-x-auto">
         <table className="w-full text-[12px]">
           <thead>
-            <tr className="text-left text-slate-400 uppercase tracking-wider text-[10px] font-semibold border-b border-slate-100">
+            <tr className="text-left text-slate-400 uppercase tracking-wider text-[10px] font-semibold border-b border-slate-100 dark:text-slate-500 dark:border-slate-800">
               <th className="py-3 px-3">상태</th>
               <th className="py-3 px-3">회원님</th>
               <th className="py-3 px-3 hidden md:table-cell">시설</th>
@@ -258,7 +258,7 @@ function ListView({ sessions, onSelect }: { sessions: LiveSession[]; onSelect: (
               <th className="py-3 px-3">알림</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {sessions.map(s => {
               const tone = sessionTone(s);
               const toneDot = { critical: 'bg-red-500', warning: 'bg-amber-500', success: 'bg-emerald-500', muted: 'bg-slate-300', info: 'bg-blue-500' }[tone];
@@ -267,24 +267,24 @@ function ListView({ sessions, onSelect }: { sessions: LiveSession[]; onSelect: (
                 <tr
                   key={s.id}
                   onClick={() => onSelect(s)}
-                  className="cursor-pointer hover:bg-slate-50 transition"
+                  className="cursor-pointer hover:bg-slate-50 transition dark:hover:bg-slate-800/50"
                 >
                   <td className="py-2.5 px-3">
                     <span className={`inline-block w-2 h-2 rounded-full ${toneDot}`} />
                   </td>
                   <td className="py-2.5 px-3">
-                    <div className="font-semibold text-slate-900">{s.elderly.name}</div>
-                    <div className="text-[10px] text-slate-400">{s.elderly.age} · {s.elderly.sessionNumber}회차</div>
+                    <div className="font-semibold text-slate-900 dark:text-slate-100">{s.elderly.name}</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500">{s.elderly.age} · {s.elderly.sessionNumber}회차</div>
                   </td>
-                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-500">{s.facility}</td>
-                  <td className="py-2.5 px-3 tabular-nums text-slate-700">{s.elapsedMinutes}분</td>
-                  <td className="py-2.5 px-3 tabular-nums text-slate-700">{s.turnCount}/{s.hardCapTurns}</td>
-                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700">{phaseLabel(s.sessionPhase)}</td>
-                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700">{depthLabel(s.depthLevel)}</td>
+                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-500 dark:text-slate-400">{s.facility}</td>
+                  <td className="py-2.5 px-3 tabular-nums text-slate-700 dark:text-slate-300">{s.elapsedMinutes}분</td>
+                  <td className="py-2.5 px-3 tabular-nums text-slate-700 dark:text-slate-300">{s.turnCount}/{s.hardCapTurns}</td>
+                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700 dark:text-slate-300">{phaseLabel(s.sessionPhase)}</td>
+                  <td className="py-2.5 px-3 hidden md:table-cell text-slate-700 dark:text-slate-300">{depthLabel(s.depthLevel)}</td>
                   <td className="py-2.5 px-3">
                     <span className={`inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${riskBg}`}>{riskLabel(s.riskLevel)}</span>
                   </td>
-                  <td className="py-2.5 px-3 hidden lg:table-cell text-slate-500 max-w-[220px] truncate">{s.currentTopic ?? '-'}</td>
+                  <td className="py-2.5 px-3 hidden lg:table-cell text-slate-500 max-w-[220px] truncate dark:text-slate-400">{s.currentTopic ?? '-'}</td>
                   <td className="py-2.5 px-3">
                     {s.alerts.length > 0 ? (
                       <span className="inline-flex px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-800 ring-1 ring-inset ring-red-200">

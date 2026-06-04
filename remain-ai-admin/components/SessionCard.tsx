@@ -51,7 +51,7 @@ function ProgressBar({ ratio, tone }: { ratio: number; tone: keyof typeof TONE_D
     info:     'bg-blue-500',
   }[tone];
   return (
-    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+    <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden dark:bg-slate-800">
       <div className={`h-full ${fillCls} transition-all`} style={{ width: `${pct}%` }} />
     </div>
   );
@@ -91,10 +91,10 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
             {isCritical && <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-70" />}
           </span>
           <div className="min-w-0">
-            <div className="text-[14px] font-semibold text-slate-900 truncate">
-              {session.elderly.name} <span className="font-normal text-slate-500">{session.elderly.age}</span>
+            <div className="text-[14px] font-semibold text-slate-900 truncate dark:text-slate-100">
+              {session.elderly.name} <span className="font-normal text-slate-500 dark:text-slate-400">{session.elderly.age}</span>
             </div>
-            <div className="text-[11px] text-slate-400 tracking-wide truncate">
+            <div className="text-[11px] text-slate-400 tracking-wide truncate dark:text-slate-500">
               {cognitiveLabel(session.elderly.cognitiveLevel)} · {session.elderly.sessionNumber}회차 · {session.facility}
             </div>
           </div>
@@ -108,15 +108,15 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
       <div className="grid grid-cols-2 gap-3 mt-3">
         <div>
           <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">턴</span>
-            <span className="text-[11px] font-semibold text-slate-700 tabular-nums">{session.turnCount}/{session.hardCapTurns}</span>
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500">턴</span>
+            <span className="text-[11px] font-semibold text-slate-700 tabular-nums dark:text-slate-300">{session.turnCount}/{session.hardCapTurns}</span>
           </div>
           <ProgressBar ratio={turnRatio} tone={tone} />
         </div>
         <div>
           <div className="flex items-baseline justify-between mb-1">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">시간</span>
-            <span className="text-[11px] font-semibold text-slate-700 tabular-nums">{session.elapsedMinutes}/{session.hardCapMinutes}분</span>
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500">시간</span>
+            <span className="text-[11px] font-semibold text-slate-700 tabular-nums dark:text-slate-300">{session.elapsedMinutes}/{session.hardCapMinutes}분</span>
           </div>
           <ProgressBar ratio={timeRatio} tone={tone} />
         </div>
@@ -127,7 +127,7 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
         <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold ring-1 ring-inset ${TONE_BG[tone]} ${TONE_TEXT[tone]} ring-current/30`}>
           {phaseLabel(session.sessionPhase)}
         </span>
-        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200">
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200 dark:text-slate-400 dark:bg-slate-800 dark:ring-slate-700">
           {depthLabel(session.depthLevel)} 이야기
         </span>
         {session.treasureDetected && (
@@ -154,14 +154,14 @@ export default function SessionCard({ session, onSelect }: { session: LiveSessio
 
       {/* 주제 + 직전 발화 */}
       {session.currentTopic && (
-        <div className="mt-3 pt-3 border-t border-slate-100">
-          <div className="text-[11px] text-slate-400 mb-0.5 tracking-wide">현재 주제</div>
-          <div className="text-[12px] text-slate-700 font-medium truncate">{session.currentTopic}</div>
+        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="text-[11px] text-slate-400 mb-0.5 tracking-wide dark:text-slate-500">현재 주제</div>
+          <div className="text-[12px] text-slate-700 font-medium truncate dark:text-slate-300">{session.currentTopic}</div>
         </div>
       )}
 
       {session.recent && (
-        <div className="mt-2 text-[12px] text-slate-500 leading-relaxed word-keep-all line-clamp-2">
+        <div className="mt-2 text-[12px] text-slate-500 leading-relaxed word-keep-all line-clamp-2 dark:text-slate-400">
           <span className={`mr-1 font-semibold ${session.recent.role === 'elderly' ? 'text-slate-700' : 'text-blue-700'}`}>
             {session.recent.role === 'elderly' ? '회원님' : 'AI'}:
           </span>

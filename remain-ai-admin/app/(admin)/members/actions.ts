@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { createServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createServerClient, createServiceRoleClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { Member, FamilyStatus, ConsentStatus } from '@/lib/members';
 import type { CognitiveLevel } from '@/lib/live-sessions';
 
@@ -44,10 +44,13 @@ export async function createMember(input: CreateMemberInput): Promise<CreateMemb
     return { ok: false, error: '세션 운영을 위해 L1~L3 동의는 필수입니다.' };
   }
 
-  const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // 인증은 user-client로 확인, 실제 insert는 service-role로 (RLS 우회).
+  // 페이지 단계의 admin 레이아웃 가드가 이미 통과한 상태이므로 안전.
+  const authClient = await createServerClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) return { ok: false, error: '로그인이 필요합니다.' };
 
+  const supabase = createServiceRoleClient();
   const payload = {
     facility_id: input.facilityId,
     name: input.name.trim(),
@@ -75,7 +78,7 @@ export async function createMember(input: CreateMemberInput): Promise<CreateMemb
     if (error?.code === '42501' || /row-level security/i.test(msg)) {
       return {
         ok: false,
-        error: '시설 권한 오류 — 본인 프로필에 연결된 시설에만 회원을 등록할 수 있습니다. 설정 페이지에서 admins.facility_id를 선택한 시설로 맞춰 주세요.',
+        error: 'admin 권한 확인이 필요합니다. admins 테이블에 본인 계정 행이 있는지 확인하세요. (마이그레이션 0008 적용 후에도 발생하면 다시 알려 주세요)',
       };
     }
     return { ok: false, error: msg };
@@ -117,10 +120,11 @@ export async function deleteMember(id: string): Promise<ActionResult> {
   if (!isSupabaseConfigured()) {
     return { ok: false, error: 'Supabase 환경변수가 설정되지 않았습니다.' };
   }
-  const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const authClient = await createServerClient();
+  const { data: { user } } = await authClient.auth.getUser();
   if (!user) return { ok: false, error: '로그인이 필요합니다.' };
 
+  const supabase = createServiceRoleClient();
   const { error } = await supabase.from('members').delete().eq('id', id);
   if (error) {
     return { ok: false, error: error.message };

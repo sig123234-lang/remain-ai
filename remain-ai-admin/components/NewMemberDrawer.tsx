@@ -64,7 +64,7 @@ function makeInitialForm(defaultFacilityId: string): FormState {
 // ─────────────────────────────────────────────
 function FieldLabel({ children, required = false }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <label className="block text-[12px] font-semibold text-slate-500 mb-1.5">
+    <label className="block text-[12px] font-semibold text-slate-500 mb-1.5 dark:text-slate-400">
       {children}
       {required && <span className="ml-1 text-red-500">*</span>}
     </label>
@@ -87,7 +87,7 @@ function AliveRadios({
     { v: 'unknown', label: '모름' },
   ];
   return (
-    <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
+    <div className="flex gap-1 bg-slate-100 rounded-xl p-1 dark:bg-slate-800">
       {opts.map((o) => (
         <button
           key={o.v}
@@ -138,17 +138,25 @@ export default function NewMemberDrawer({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // 상태 초기화는 open 전이 시에만 — onClose/defaultFacilityId 변경으로 form이 날아가지 않게
   useEffect(() => {
     if (!open) return;
     setForm(makeInitialForm(defaultFacilityId));
     setError(null);
     setSubmitting(false);
+    // defaultFacilityId는 첫 진입 시점 값만 사용 — 그 후 부모 polling으로 바뀌어도 무시
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // ESC 닫기는 onClose 갱신 따라가도 무방
+  useEffect(() => {
+    if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose, defaultFacilityId]);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -216,26 +224,26 @@ export default function NewMemberDrawer({
         role="dialog"
         aria-label="새 회원님 등록"
         className="
-          fixed top-0 right-0 bottom-0 z-50
-          w-full sm:w-[520px] max-w-[100vw]
-          bg-white shadow-2xl
-          flex flex-col
-          animate-fade-in-up
-          overflow-hidden
-        "
+ fixed top-0 right-0 bottom-0 z-50
+ w-full sm:w-[520px] max-w-[100vw]
+ bg-white shadow-2xl
+ flex flex-col
+ animate-fade-in-up
+ overflow-hidden
+ "
       >
         {/* 헤더 */}
-        <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between gap-3">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between gap-3 dark:border-slate-800">
           <div>
-            <div className="text-[18px] font-bold text-slate-900 tracking-tight">새 회원님 등록</div>
-            <div className="text-[12px] text-slate-400 mt-0.5">필수 항목을 채우면 즉시 등록됩니다.</div>
+            <div className="text-[18px] font-bold text-slate-900 tracking-tight dark:text-slate-100">새 회원님 등록</div>
+            <div className="text-[12px] text-slate-400 mt-0.5 dark:text-slate-500">필수 항목을 채우면 즉시 등록됩니다.</div>
           </div>
           <button
             onClick={onClose}
             aria-label="닫기"
-            className="grid place-items-center w-9 h-9 rounded-full hover:bg-slate-100 active:scale-95 transition"
+            className="grid place-items-center w-9 h-9 rounded-full hover:bg-slate-100 active:scale-95 transition dark:hover:bg-slate-800"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-slate-700" aria-hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-slate-700 dark:text-slate-300" aria-hidden>
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
@@ -245,7 +253,7 @@ export default function NewMemberDrawer({
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-7">
           {/* 기본 정보 */}
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">기본 정보</div>
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">기본 정보</div>
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
                 <FieldLabel required>이름</FieldLabel>
@@ -306,7 +314,7 @@ export default function NewMemberDrawer({
 
           {/* 보호자 */}
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">보호자</div>
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">보호자</div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <FieldLabel required>이름</FieldLabel>
@@ -356,22 +364,22 @@ export default function NewMemberDrawer({
                 type="checkbox"
                 checked={form.kakaoChannelLinked}
                 onChange={(e) => setForm({ ...form, kakaoChannelLinked: e.target.checked })}
-                className="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-300"
+                className="w-4 h-4 rounded border-slate-300 text-slate-900 focus:ring-slate-300 dark:text-slate-100"
               />
-              <span className="text-[12px] text-slate-700">remAIn 카카오 채널 친구로 추가됨</span>
-              <span className="text-[10px] text-slate-400">(이미지 포함 친구톡 가능)</span>
+              <span className="text-[12px] text-slate-700 dark:text-slate-300">remAIn 카카오 채널 친구로 추가됨</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500">(이미지 포함 친구톡 가능)</span>
             </label>
-            <p className="mt-2 text-[11px] text-slate-400">
+            <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
               리포트 발송 대상이 됩니다. 휴대폰은 카카오 알림톡 / SMS, 이메일은 이메일 발송에 사용됩니다.
             </p>
           </section>
 
           {/* 가족 상태 */}
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">
               가족 생존 상태
             </div>
-            <p className="text-[11px] text-slate-400 mb-3">
+            <p className="text-[11px] text-slate-400 mb-3 dark:text-slate-500">
               사망 부모에게 현재형 질문을 하지 않도록 LLM이 참조합니다 (절대 규칙 #6).
             </p>
             <div className="space-y-3">
@@ -381,7 +389,7 @@ export default function NewMemberDrawer({
                 { key: 'spouse', label: '배우자' },
               ] as const).map((row) => (
                 <div key={row.key} className="grid grid-cols-3 items-center gap-3">
-                  <div className="text-[13px] font-medium text-slate-700">{row.label}</div>
+                  <div className="text-[13px] font-medium text-slate-700 dark:text-slate-300">{row.label}</div>
                   <div className="col-span-2">
                     <AliveRadios
                       value={form.family[row.key]}
@@ -395,7 +403,7 @@ export default function NewMemberDrawer({
 
           {/* 회피 주제 */}
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">
               회피할 주제 <span className="font-normal text-slate-300">(선택)</span>
             </div>
             <textarea
@@ -409,10 +417,10 @@ export default function NewMemberDrawer({
 
           {/* 동의 */}
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">
               동의 (consentStatus)
             </div>
-            <ul className="divide-y divide-slate-100 -mt-2">
+            <ul className="divide-y divide-slate-100 -mt-2 dark:divide-slate-800">
               {([
                 { id: 'L1', name: 'L1 — 세션 진행', desc: '대화 진행 기본 동의', required: true },
                 { id: 'L2', name: 'L2 — 음성 처리', desc: 'STT 변환·처리', required: true },
@@ -423,11 +431,11 @@ export default function NewMemberDrawer({
               ] as const).map((l) => (
                 <li key={l.id} className="py-2.5 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-semibold text-slate-800 flex items-center gap-2">
+                    <div className="text-[13px] font-semibold text-slate-800 flex items-center gap-2 dark:text-slate-200">
                       {l.name}
                       {l.required && <span className="text-[10px] text-red-500 font-bold">필수</span>}
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">{l.desc}</div>
+                    <div className="text-[11px] text-slate-400 mt-0.5 dark:text-slate-500">{l.desc}</div>
                   </div>
                   <Toggle
                     on={form.consent[l.id]}
@@ -441,7 +449,7 @@ export default function NewMemberDrawer({
         </div>
 
         {/* 액션 바 (하단 고정) — 에러 메시지는 여기에 sticky로 노출 */}
-        <div className="border-t border-slate-100 bg-white">
+        <div className="border-t border-slate-100 bg-white dark:border-slate-800">
           {error && (
             <div className="mx-5 mt-3 rounded-xl bg-red-50 ring-1 ring-red-200 px-3 py-2 text-[12px] text-red-700 flex items-start gap-2 animate-fade-in">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mt-0.5 shrink-0" aria-hidden>
@@ -458,7 +466,7 @@ export default function NewMemberDrawer({
                 type="button"
                 onClick={onClose}
                 disabled={submitting}
-                className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] disabled:opacity-60 transition"
+                className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] disabled:opacity-60 transition dark:text-slate-300 dark:bg-slate-800/50 dark:ring-slate-700 dark:hover:bg-slate-800"
               >
                 취소
               </button>

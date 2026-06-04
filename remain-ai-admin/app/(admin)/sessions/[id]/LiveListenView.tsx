@@ -1,7 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState, useTransition } from 'react';
+import { endSessionAction } from '@/app/(admin)/sessions/actions';
+import type { SessionMode } from '@/lib/sessions-server';
 import type { LiveSession, RecentUtterance } from '@/lib/live-sessions';
 import { aliveLabel, alertLevelLabel, cognitiveLabel, depthLabel, phaseLabel, riskLabel, sessionTone } from '@/lib/live-sessions';
 import { Card, CardBody, CardHeader, Pill, StatusDot } from '@/components/Card';
@@ -65,12 +68,143 @@ function TurnBubble({ turn }: { turn: RecentUtterance }) {
 // ─────────────────────────────────────────────
 //  메인
 // ─────────────────────────────────────────────
-export default function LiveListenView({ session }: { session: LiveSession }) {
+export default function LiveListenView({ session, mode = 'voice' }: { session: LiveSession; mode?: SessionMode }) {
+  const router = useRouter();
+  const [endPending, startEndTransition] = useTransition();
   const [muted, setMuted] = useState(false);
   const [memo, setMemo] = useState('');
   const [memos, setMemos] = useState<{ at: string; text: string }[]>([]);
   const [listenStart] = useState(() => Date.now());
   const [listenElapsed, setListenElapsed] = useState(0);
+
+  // ── 속기사 모드용 — 어르신 발화 타이핑 입력
+  const [steno, setSteno] = useState('');
+  const [stenoSending, setStenoSending] = useState(false);
+  const [stenoError, setStenoError] = useState<string | null>(null);
+  const stenoAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  async function handleStenoSubmit() {
+    const text = steno.trim();
+    if (!text || stenoSending) return;
+    setSteno('');
+    setStenoSending(true);
+    setStenoError(null);
+    try {
+      const res = await fetch('/admin/api/conversation/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: session.id, text }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+
+      // 즉시 화면 갱신 (다음 polling tick 안 기다리고)
+      router.refresh();
+
+      // 캡 도달 등 — JSON 응답
+      const ctype = res.headers.get('content-type') ?? '';
+      if (ctype.includes('application/json')) {
+        const data = await res.json();
+        if (data.ended) router.push('/sessions');
+        return;
+      }
+
+      // SSE 스트림 — 문장 단위 오디오 청크를 순차 재생 (어르신이 듣게)
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+      let ended = false;
+      const queue: { b64: string; mime: string }[] = [];
+      let playing = false;
+      let streamEnded = false;
+      let resolvePlayback!: () => void;
+      const playbackDone = new Promise<void>((r) => { resolvePlayback = r; });
+
+      const playNext = () => {
+        if (playing) return;
+        const item = queue.shift();
+        if (!item) {
+          if (streamEnded) resolvePlayback();
+          return;
+        }
+        playing = true;
+        const binary = atob(item.b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        const url = URL.createObjectURL(new Blob([bytes], { type: item.mime }));
+        const audio = new Audio(url);
+        stenoAudioRef.current = audio;
+        const cont = () => { URL.revokeObjectURL(url); playing = false; playNext(); };
+        audio.onended = cont;
+        audio.onerror = cont;
+        audio.play().catch(cont);
+      };
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buf.indexOf('\n\n')) !== -1) {
+          const rawEvt = buf.slice(0, idx);
+          buf = buf.slice(idx + 2);
+          const dataLine = rawEvt.split('\n').find((l) => l.startsWith('data:'));
+          if (!dataLine) continue;
+          let evt: { type?: string; ended?: boolean; error?: string; audio_base64?: string; audio_mime?: string };
+          try { evt = JSON.parse(dataLine.slice(dataLine.indexOf(':') + 1).trim()); } catch { continue; }
+          if (evt.type === 'audio' && evt.audio_base64) {
+            queue.push({ b64: evt.audio_base64, mime: evt.audio_mime ?? 'audio/mpeg' });
+            playNext();
+          } else if (evt.type === 'done') {
+            ended = Boolean(evt.ended);
+          } else if (evt.type === 'error') {
+            throw new Error(evt.error || '스트림 오류');
+          }
+        }
+      }
+      streamEnded = true;
+      if (!playing && queue.length === 0) resolvePlayback();
+      await playbackDone;
+      router.refresh();
+
+      if (ended) {
+        router.push('/sessions');
+      }
+    } catch (e) {
+      setStenoError(e instanceof Error ? e.message : String(e));
+      setSteno(text); // 실패 시 입력 복구
+    } finally {
+      setStenoSending(false);
+    }
+  }
+
+  function handleStenoKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      void handleStenoSubmit();
+    }
+  }
+
+  // 언마운트 시 재생 중인 AI 오디오 정지
+  useEffect(() => {
+    return () => {
+      stenoAudioRef.current?.pause();
+    };
+  }, []);
+
+  function handleEndSession() {
+    if (!confirm(`${session.elderly.name}님의 세션을 종료할까요? 종료 후에는 어르신도 더 이상 대화할 수 없습니다.`)) return;
+    startEndTransition(async () => {
+      const result = await endSessionAction(session.id);
+      if (!result.ok) {
+        alert(`종료 실패: ${result.error}`);
+        return;
+      }
+      router.push('/sessions');
+    });
+  }
   const transcriptRef = useRef<HTMLDivElement>(null);
 
   // ── 진행자 호출 상태 ──
@@ -87,11 +221,33 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
     return () => clearInterval(t);
   }, [listenStart]);
 
-  // 초기 마운트 시 트랜스크립트 맨 아래로
+  // 실시간 동기화 — 3초마다 서버 컴포넌트 재실행해서 새 대화 턴/상태 가져옴
+  // 페이지 가시성이 hidden이면 (탭 백그라운드) 폴링 멈춰서 비용 절감
   useEffect(() => {
-    const el = transcriptRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, []);
+    let active = true;
+    const tick = () => {
+      if (!active) return;
+      if (document.visibilityState === 'visible') {
+        router.refresh();
+      }
+    };
+    const interval = setInterval(tick, 3000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [router]);
+
+  // 초기 마운트 + 새 턴 도착 시 트랜스크립트 맨 아래로 자동 스크롤
+  const prevTurnCountRef = useRef(0);
+  useEffect(() => {
+    const count = (session.recentTurns ?? []).length;
+    if (count >= prevTurnCountRef.current) {
+      const el = transcriptRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    }
+    prevTurnCountRef.current = count;
+  }, [session.recentTurns]);
 
   function handleSaveMemo() {
     const t = memo.trim();
@@ -170,17 +326,17 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
           <Link
             href="/sessions"
             aria-label="실시간 세션 목록으로"
-            className="grid place-items-center w-9 h-9 rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50 active:scale-95 transition shrink-0"
+            className="grid place-items-center w-9 h-9 rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50 active:scale-95 transition shrink-0 dark:ring-slate-700 dark:hover:bg-slate-800/50"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-700" aria-hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-700 dark:text-slate-300" aria-hidden>
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </Link>
           <div className="min-w-0">
-            <div className="text-[20px] sm:text-[22px] font-bold text-slate-900 tracking-tight truncate">
+            <div className="text-[20px] sm:text-[22px] font-bold text-slate-900 tracking-tight truncate dark:text-slate-100">
               {session.elderly.name} 회원님
             </div>
-            <div className="text-[12px] text-slate-400 truncate">
+            <div className="text-[12px] text-slate-400 truncate dark:text-slate-500">
               {session.elderly.age}세 · {cognitiveLabel(session.elderly.cognitiveLevel)} · {session.elderly.sessionNumber}회차 · {session.facility}
             </div>
           </div>
@@ -210,13 +366,13 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
               </span>
             </span>
           )}
-          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white ring-1 ring-slate-200 text-[11px] font-semibold text-slate-600">
+          <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white ring-1 ring-slate-200 text-[11px] font-semibold text-slate-600 dark:text-slate-400 dark:ring-slate-700">
             <span className="relative inline-flex w-2 h-2">
               <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-75" />
               <span className="relative inline-flex rounded-full bg-red-500 w-2 h-2" />
             </span>
             청취 중
-            <span className="text-slate-400 tabular-nums">{elapsedStr}</span>
+            <span className="text-slate-400 tabular-nums dark:text-slate-500">{elapsedStr}</span>
           </span>
         </div>
       </div>
@@ -288,15 +444,15 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                     {secsToMmss(diffSecs(activeCall.calledAt))} 째
                   </span>
                 </div>
-                <div className="text-[14px] font-semibold text-slate-900">
+                <div className="text-[14px] font-semibold text-slate-900 dark:text-slate-100">
                   사유: {reasonLabel(activeCall.reason)}
                 </div>
                 {activeCall.note && (
-                  <div className="text-[12px] text-slate-600 mt-1 leading-relaxed word-keep-all">
+                  <div className="text-[12px] text-slate-600 mt-1 leading-relaxed word-keep-all dark:text-slate-400">
                     “{activeCall.note}”
                   </div>
                 )}
-                <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500 tabular-nums">
+                <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500 tabular-nums dark:text-slate-400">
                   {activeCall.respondedAt && (
                     <span>응답 {secsToMmss(diffSecs(activeCall.calledAt, activeCall.respondedAt))}</span>
                   )}
@@ -317,7 +473,7 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="px-3 py-1.5 rounded-lg bg-transparent text-slate-500 text-[12px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition"
+                    className="px-3 py-1.5 rounded-lg bg-transparent text-slate-500 text-[12px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition dark:text-slate-400 dark:hover:bg-slate-800"
                   >
                     취소
                   </button>
@@ -354,7 +510,7 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
               description={`현재 ${session.turnCount}턴 · ${session.elapsedMinutes}분째 진행 중`}
               action={
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-50 ring-1 ring-slate-200 text-[11px] font-semibold text-slate-700`}>
+                  <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-50 ring-1 ring-slate-200 text-[11px] font-semibold text-slate-700 dark:text-slate-300 dark:bg-slate-800/50 dark:ring-slate-700`}>
                     <Waveform color={indicator.wave} />
                     {indicator.label}
                   </span>
@@ -367,7 +523,7 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                 className="flex-1 overflow-y-auto bg-slate-50/40 rounded-xl p-4 space-y-3 min-h-[320px] max-h-[480px]"
               >
                 {turns.length === 0 ? (
-                  <div className="grid place-items-center h-full text-[12px] text-slate-400">
+                  <div className="grid place-items-center h-full text-[12px] text-slate-400 dark:text-slate-500">
                     아직 발화 없음
                   </div>
                 ) : (
@@ -376,9 +532,48 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                 {/* 라이브 인디케이터 (트랜스크립트 끝) */}
                 <div className="flex items-center gap-2 pt-2">
                   <span className={`inline-block w-1.5 h-1.5 rounded-full ${indicator.dot}`} />
-                  <span className="text-[11px] text-slate-400 tracking-wide">{indicator.label}…</span>
+                  <span className="text-[11px] text-slate-400 tracking-wide dark:text-slate-500">{indicator.label}…</span>
                 </div>
               </div>
+
+              {/* 속기사 모드 — 진행자가 어르신 발화를 타이핑 */}
+              {mode === 'stenographer' && (
+                <div className="mt-3 rounded-xl bg-amber-50/60 ring-1 ring-amber-200 p-3 dark:bg-amber-950/30 dark:ring-amber-900/60">
+                  <div className="text-[11px] uppercase tracking-wider font-semibold text-amber-700 dark:text-amber-300 mb-2">
+                    속기사 모드 · 회원님 발화 입력
+                  </div>
+                  <div className="flex gap-2 items-end">
+                    <textarea
+                      value={steno}
+                      onChange={(e) => setSteno(e.target.value)}
+                      onKeyDown={handleStenoKey}
+                      rows={2}
+                      placeholder="회원님이 말씀하신 그대로 입력하고 Enter (Shift+Enter 줄바꿈)"
+                      className="flex-1 px-3 py-2 rounded-lg bg-white ring-1 ring-amber-200 text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none dark:bg-slate-900 dark:ring-amber-900/60 dark:text-slate-200 dark:placeholder:text-slate-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleStenoSubmit}
+                      disabled={stenoSending || !steno.trim()}
+                      className="px-4 py-2.5 rounded-lg bg-amber-600 text-white text-[13px] font-semibold hover:bg-amber-700 active:scale-[0.99] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {stenoSending ? '전송 중…' : '전송'}
+                    </button>
+                  </div>
+                  {stenoError && (
+                    <div className="mt-2 text-[12px] text-red-700 dark:text-red-300">{stenoError}</div>
+                  )}
+                  <div className="mt-1.5 text-[11px] text-amber-700/70 dark:text-amber-400/70 flex items-center gap-2">
+                    <span>Enter로 전송 → AI 응답 음성 자동 재생 (어르신이 듣게)</span>
+                    {stenoSending && (
+                      <span className="inline-flex items-center gap-1 ml-auto">
+                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                        AI 응답 중 — 계속 타이핑 가능
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* 오디오 컨트롤 */}
               <div className="mt-3 flex items-center justify-between gap-3">
@@ -410,7 +605,7 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                     </>
                   )}
                 </button>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">
                   실시간 오디오 스트림 — 백엔드 연결 후 활성화
                 </span>
               </div>
@@ -426,7 +621,7 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                 onChange={(e) => setMemo(e.target.value)}
                 placeholder="예: 아버지 이야기에서 보물 감지. 다음 세션에서 이어가도 좋겠음."
                 rows={2}
-                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-100 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 resize-none"
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-100 text-[13px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 resize-none dark:text-slate-200 dark:bg-slate-800/50 dark:ring-slate-800 dark:placeholder:text-slate-500"
               />
               <div className="flex justify-end mt-2">
                 <button
@@ -438,10 +633,10 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                 </button>
               </div>
               {memos.length > 0 && (
-                <ul className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+                <ul className="mt-3 pt-3 border-t border-slate-100 space-y-2 dark:border-slate-800">
                   {memos.map((m, i) => (
-                    <li key={i} className="text-[12px] text-slate-600 bg-slate-50 rounded-lg px-3 py-2">
-                      <span className="text-slate-400 tabular-nums mr-2">{hhmm(m.at)}</span>
+                    <li key={i} className="text-[12px] text-slate-600 bg-slate-50 rounded-lg px-3 py-2 dark:text-slate-400 dark:bg-slate-800/50">
+                      <span className="text-slate-400 tabular-nums mr-2 dark:text-slate-500">{hhmm(m.at)}</span>
                       {m.text}
                     </li>
                   ))}
@@ -458,24 +653,24 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
             <CardHeader title="진행 상황" />
             <CardBody className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">세션 단계</div>
-                  <div className="mt-1 text-[14px] font-semibold text-slate-800">{phaseLabel(session.sessionPhase)}</div>
+                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">세션 단계</div>
+                  <div className="mt-1 text-[14px] font-semibold text-slate-800 dark:text-slate-200">{phaseLabel(session.sessionPhase)}</div>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">위험도</div>
+                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">위험도</div>
                   <div className={`mt-1 text-[14px] font-bold ${tone === 'critical' ? 'text-red-600' : tone === 'warning' ? 'text-amber-600' : 'text-emerald-600'}`}>
                     {riskLabel(session.riskLevel)}
                   </div>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">대화 깊이</div>
-                  <div className="mt-1 text-[14px] font-semibold text-slate-800">{depthLabel(session.depthLevel)}</div>
+                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">대화 깊이</div>
+                  <div className="mt-1 text-[14px] font-semibold text-slate-800 dark:text-slate-200">{depthLabel(session.depthLevel)}</div>
                 </div>
-                <div className="rounded-lg bg-slate-50 p-3">
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">대화 횟수</div>
-                  <div className="mt-1 text-[14px] font-semibold text-slate-800 tabular-nums">
-                    {session.turnCount}회 <span className="text-slate-400 font-normal text-[12px]">/ 최대 {session.hardCapTurns}</span>
+                <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">대화 횟수</div>
+                  <div className="mt-1 text-[14px] font-semibold text-slate-800 tabular-nums dark:text-slate-200">
+                    {session.turnCount}회 <span className="text-slate-400 font-normal text-[12px] dark:text-slate-500">/ 최대 {session.hardCapTurns}</span>
                   </div>
                 </div>
               </div>
@@ -494,7 +689,7 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
             <Card>
               <CardHeader title="현재 주제" />
               <CardBody>
-                <div className="text-[14px] font-semibold text-slate-800 word-keep-all">{session.currentTopic}</div>
+                <div className="text-[14px] font-semibold text-slate-800 word-keep-all dark:text-slate-200">{session.currentTopic}</div>
               </CardBody>
             </Card>
           )}
@@ -505,16 +700,16 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
             <CardBody className="space-y-3">
               {(session.mentionedPeople ?? []).length > 0 && (
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5">인물</div>
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5 dark:text-slate-500">인물</div>
                   <ul className="space-y-1">
                     {(session.mentionedPeople ?? []).map((p, i) => (
                       <li key={i} className="flex items-center justify-between text-[12px]">
-                        <span className="text-slate-700">
+                        <span className="text-slate-700 dark:text-slate-300">
                           <span className="font-semibold">{p.name}</span>
-                          <span className="text-slate-400 ml-1.5">{p.relation}</span>
+                          <span className="text-slate-400 ml-1.5 dark:text-slate-500">{p.relation}</span>
                         </span>
                         {p.aliveStatus === 'deceased' && (
-                          <span className="text-[10px] font-semibold text-slate-400">{aliveLabel('deceased')}</span>
+                          <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">{aliveLabel('deceased')}</span>
                         )}
                         {p.aliveStatus === 'alive' && (
                           <span className="text-[10px] font-semibold text-emerald-600">{aliveLabel('alive')}</span>
@@ -529,10 +724,10 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
               )}
               {(session.mentionedPlaces ?? []).length > 0 && (
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5">장소</div>
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5 dark:text-slate-500">장소</div>
                   <div className="flex flex-wrap gap-1.5">
                     {(session.mentionedPlaces ?? []).map((p, i) => (
-                      <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700">
+                      <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 dark:text-slate-300 dark:bg-slate-800">
                         {p.name}
                       </span>
                     ))}
@@ -541,10 +736,10 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
               )}
               {(session.mentionedTimeperiods ?? []).length > 0 && (
                 <div>
-                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5">시기</div>
+                  <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1.5 dark:text-slate-500">시기</div>
                   <div className="flex flex-wrap gap-1.5">
                     {(session.mentionedTimeperiods ?? []).map((t, i) => (
-                      <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700">
+                      <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 dark:text-slate-300 dark:bg-slate-800">
                         {t}
                       </span>
                     ))}
@@ -552,7 +747,7 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                 </div>
               )}
               {(session.mentionedPeople ?? []).length === 0 && (session.mentionedPlaces ?? []).length === 0 && (
-                <div className="text-[12px] text-slate-400">아직 추출된 엔티티 없음</div>
+                <div className="text-[12px] text-slate-400 dark:text-slate-500">아직 추출된 엔티티 없음</div>
               )}
             </CardBody>
           </Card>
@@ -566,16 +761,16 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
             />
             <CardBody>
               {callHistory.length === 0 ? (
-                <div className="text-[12px] text-slate-400">아직 호출 기록 없음</div>
+                <div className="text-[12px] text-slate-400 dark:text-slate-500">아직 호출 기록 없음</div>
               ) : (
-                <ul className="divide-y divide-slate-100 -my-1">
+                <ul className="divide-y divide-slate-100 -my-1 dark:divide-slate-800">
                   {callHistory.map((c) => {
                     const respSec = c.respondedAt ? diffSecs(c.calledAt, c.respondedAt) : null;
                     const arrSec  = c.arrivedAt   ? diffSecs(c.calledAt, c.arrivedAt)   : null;
                     return (
                       <li key={c.id} className="py-2.5 first:pt-1 last:pb-1">
                         <div className="flex items-center justify-between gap-2 mb-1">
-                          <span className="text-[12px] font-semibold text-slate-800 truncate">
+                          <span className="text-[12px] font-semibold text-slate-800 truncate dark:text-slate-200">
                             {reasonLabel(c.reason)}
                           </span>
                           {c.status === 'resolved' ? (
@@ -584,13 +779,13 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
                             <Pill>{statusLabel(c.status)}</Pill>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 text-[11px] text-slate-500 tabular-nums">
+                        <div className="flex items-center gap-3 text-[11px] text-slate-500 tabular-nums dark:text-slate-400">
                           <span>{hhmm(c.calledAt)}</span>
                           {respSec !== null && <span>응답 {secsToMmss(respSec)}</span>}
                           {arrSec  !== null && <span>도착 {secsToMmss(arrSec)}</span>}
                         </div>
                         {c.note && (
-                          <div className="text-[11px] text-slate-500 mt-1 line-clamp-2">“{c.note}”</div>
+                          <div className="text-[11px] text-slate-500 mt-1 line-clamp-2 dark:text-slate-400">“{c.note}”</div>
                         )}
                       </li>
                     );
@@ -607,11 +802,11 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <StatusDot tone={speaking === 'silence' ? 'muted' : speaking === 'ai' ? 'info' : 'success'} />
-                  <span className="text-[12px] font-medium text-slate-700">{indicator.label}</span>
+                  <span className="text-[12px] font-medium text-slate-700 dark:text-slate-300">{indicator.label}</span>
                 </div>
                 <Waveform count={6} color={indicator.wave} />
               </div>
-              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 dark:border-slate-800">
                 <span>오디오 스트림</span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -624,11 +819,11 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
       </div>
 
       {/* 하단 액션 바 */}
-      <div className="sticky bottom-0 -mx-5 lg:-mx-10 mt-6 px-5 lg:px-10 py-3 bg-white/95 backdrop-blur-md border-t border-slate-100">
+      <div className="sticky bottom-0 -mx-5 lg:-mx-10 mt-6 px-5 lg:px-10 py-3 bg-white/95 backdrop-blur-md border-t border-slate-100 dark:border-slate-800">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Link
             href="/sessions"
-            className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition"
+            className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition dark:text-slate-300 dark:bg-slate-800/50 dark:ring-slate-700 dark:hover:bg-slate-800"
           >
             ← 목록으로
           </Link>
@@ -640,8 +835,12 @@ export default function LiveListenView({ session }: { session: LiveSession }) {
             >
               {activeCall ? '진행자 호출됨' : '진행자 호출'}
             </button>
-            <button className="px-4 py-2.5 rounded-xl bg-red-600 text-white text-[13px] font-semibold hover:bg-red-700 active:scale-[0.99] transition">
-              세션 종료
+            <button
+              onClick={handleEndSession}
+              disabled={endPending}
+              className="px-4 py-2.5 rounded-xl bg-red-600 text-white text-[13px] font-semibold hover:bg-red-700 active:scale-[0.99] transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {endPending ? '종료 중…' : '세션 종료'}
             </button>
           </div>
         </div>

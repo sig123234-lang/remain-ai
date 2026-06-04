@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
-import { findReportById } from '@/lib/guardian-reports';
+import { fetchGuardianReportBySessionId } from '@/lib/sessions-server';
 import ReportDetailView from './ReportDetailView';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ReportDetailPage({
   params,
@@ -8,7 +10,7 @@ export default async function ReportDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const report = findReportById(id);
+  const report = await fetchGuardianReportBySessionId(id);
   if (!report) {
     notFound();
   }

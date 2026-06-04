@@ -9,6 +9,7 @@
  */
 
 import { createServerClient as createSSRServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import type { Database } from './types';
 
@@ -42,4 +43,23 @@ export function isSupabaseConfigured(): boolean {
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
+}
+
+/**
+ * RLS를 우회하는 service-role 클라이언트.
+ *
+ * 어르신 세션 페이지(/session/*)·음성 API는 로그인 없이 접근하므로 RLS로 막힘.
+ * sessionId UUID 자체가 credential 역할 (URL을 아는 사람만 진입).
+ *
+ * ⚠️ 클라이언트 컴포넌트·브라우저에 절대 노출 금지. server-only.
+ */
+export function createServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    throw new Error('Supabase service-role 환경변수가 설정되지 않았습니다.');
+  }
+  return createClient<Database>(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }

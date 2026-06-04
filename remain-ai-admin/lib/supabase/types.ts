@@ -128,9 +128,31 @@ export type Database = {
           topics: string[] | null;
           emotional_score: number | null;
           last_session_state: Json;
+          extraction: Json | null;
+          mode: 'voice' | 'stenographer' | 'realtime';
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['sessions']['Row'], 'created_at'> & { created_at?: string };
+        Insert: {
+          id?: string;
+          member_id: string;
+          session_number: number;
+          started_at?: string;
+          ended_at?: string | null;
+          status?: 'active' | 'wrapup' | 'force_end' | 'post_processing' | 'completed';
+          duration_minutes?: number;
+          turn_count?: number;
+          depth_level?: number;
+          risk_level?: 'low' | 'medium' | 'high';
+          treasure_detected?: boolean;
+          risk_flagged?: boolean;
+          main_topic?: string | null;
+          topics?: string[] | null;
+          emotional_score?: number | null;
+          last_session_state?: Json;
+          extraction?: Json | null;
+          mode?: 'voice' | 'stenographer' | 'realtime';
+          created_at?: string;
+        };
         Update: Partial<Database['public']['Tables']['sessions']['Insert']>;
         Relationships: [];
       };
@@ -150,8 +172,19 @@ export type Database = {
           llm_structured: Json | null;
           created_at: string;
         };
-        Insert: Omit<Database['public']['Tables']['conversation_turns']['Row'], 'id' | 'created_at'> & {
+        Insert: {
           id?: string;
+          session_id: string;
+          turn_index: number;
+          role: 'ai' | 'elderly';
+          text: string;
+          timestamp_sec?: number;
+          duration_sec?: number | null;
+          stt_confidence?: number | null;
+          stt_low_confidence_words?: Json | null;
+          stt_garbage_detected?: boolean;
+          audio_features?: Json | null;
+          llm_structured?: Json | null;
           created_at?: string;
         };
         Update: Partial<Database['public']['Tables']['conversation_turns']['Insert']>;

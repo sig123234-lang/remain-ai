@@ -104,17 +104,17 @@ export default function ArchivedSessionView({
           <Link
             href={`/members/${member.id}`}
             aria-label="회원 상세로"
-            className="grid place-items-center w-9 h-9 rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50 active:scale-95 transition shrink-0"
+            className="grid place-items-center w-9 h-9 rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50 active:scale-95 transition shrink-0 dark:ring-slate-700 dark:hover:bg-slate-800/50"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-700" aria-hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-700 dark:text-slate-300" aria-hidden>
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </Link>
           <div className="min-w-0">
-            <div className="text-[20px] sm:text-[22px] font-bold text-slate-900 tracking-tight">
+            <div className="text-[20px] sm:text-[22px] font-bold text-slate-900 tracking-tight dark:text-slate-100">
               {member.name} 회원님 · {session.sessionNumber}회차
             </div>
-            <div className="text-[12px] text-slate-400">
+            <div className="text-[12px] text-slate-400 dark:text-slate-500">
               {dateTimeKo(session.startedAt)} · {session.durationMinutes}분 · {session.turnCount}회 대화 · {cognitiveBadge(member.cognitiveLevel)} · {member.facility}
             </div>
           </div>
@@ -138,29 +138,29 @@ export default function ArchivedSessionView({
       {/* 메타 요약 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
         <Card className="px-4 py-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">대화 시간</div>
-          <div className="mt-1.5 text-[22px] font-bold text-slate-900 tabular-nums">
-            {session.durationMinutes}<span className="text-[12px] font-normal text-slate-400">분</span>
+          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">대화 시간</div>
+          <div className="mt-1.5 text-[22px] font-bold text-slate-900 tabular-nums dark:text-slate-100">
+            {session.durationMinutes}<span className="text-[12px] font-normal text-slate-400 dark:text-slate-500">분</span>
           </div>
         </Card>
         <Card className="px-4 py-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">대화 횟수</div>
-          <div className="mt-1.5 text-[22px] font-bold text-slate-900 tabular-nums">
-            {session.turnCount}<span className="text-[12px] font-normal text-slate-400">회</span>
+          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">대화 횟수</div>
+          <div className="mt-1.5 text-[22px] font-bold text-slate-900 tabular-nums dark:text-slate-100">
+            {session.turnCount}<span className="text-[12px] font-normal text-slate-400 dark:text-slate-500">회</span>
           </div>
         </Card>
         <Card className="px-4 py-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">감정 점수</div>
+          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">감정 점수</div>
           <div className="mt-1.5 text-[22px] font-bold text-emerald-600 tabular-nums">
             {session.emotionalScore}
           </div>
         </Card>
         <Card className="px-4 py-4">
-          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">상태</div>
+          <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">상태</div>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {session.treasureDetected && <Pill tone="info">깊은 이야기</Pill>}
             {session.riskFlagged && <Pill tone="critical">위기 신호</Pill>}
-            {!session.treasureDetected && !session.riskFlagged && <span className="text-[12px] text-slate-400">평온</span>}
+            {!session.treasureDetected && !session.riskFlagged && <span className="text-[12px] text-slate-400 dark:text-slate-500">평온</span>}
           </div>
         </Card>
       </div>
@@ -194,7 +194,7 @@ export default function ArchivedSessionView({
               {session.audio.stored ? (
                 <>
                   {/* 플레이어 */}
-                  <div className="rounded-xl bg-slate-50 p-4 space-y-3">
+                  <div className="rounded-xl bg-slate-50 p-4 space-y-3 dark:bg-slate-800/50">
                     <div className="flex items-center gap-3">
                       <button
                         onClick={handlePlay}
@@ -213,10 +213,10 @@ export default function ArchivedSessionView({
                         )}
                       </button>
                       <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-semibold text-slate-900">
+                        <div className="text-[13px] font-semibold text-slate-900 dark:text-slate-100">
                           {member.name} 회원님 · {session.sessionNumber}회차
                         </div>
-                        <div className="text-[11px] text-slate-400 tabular-nums">
+                        <div className="text-[11px] text-slate-400 tabular-nums dark:text-slate-500">
                           {formatDuration(session.audio.durationSec)} · {session.audio.format.toUpperCase()}
                         </div>
                       </div>
@@ -225,7 +225,7 @@ export default function ArchivedSessionView({
                     <div className="h-1 rounded-full bg-slate-200 overflow-hidden">
                       <div className={`h-full bg-slate-900 transition-all ${playing ? 'w-1/3' : 'w-0'}`} />
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-slate-400 tabular-nums font-mono">
+                    <div className="flex items-center justify-between text-[10px] text-slate-400 tabular-nums font-mono dark:text-slate-500">
                       <span>{playing ? secToMmss(Math.floor(session.audio.durationSec / 3)) : '00:00'}</span>
                       <span>{secToMmss(session.audio.durationSec)}</span>
                     </div>
@@ -234,7 +234,7 @@ export default function ArchivedSessionView({
                   {/* 다운로드 */}
                   <button
                     onClick={handleDownload}
-                    className="mt-3 w-full px-4 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition flex items-center justify-center gap-1.5"
+                    className="mt-3 w-full px-4 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition flex items-center justify-center gap-1.5 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4" aria-hidden>
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -245,22 +245,22 @@ export default function ArchivedSessionView({
                   </button>
 
                   {/* 파일 메타 */}
-                  <dl className="mt-4 pt-4 border-t border-slate-100 space-y-1.5 text-[11px]">
+                  <dl className="mt-4 pt-4 border-t border-slate-100 space-y-1.5 text-[11px] dark:border-slate-800">
                     <div className="flex items-center justify-between">
-                      <dt className="text-slate-400">파일 크기</dt>
-                      <dd className="text-slate-700 font-medium tabular-nums">{formatBytes(session.audio.sizeBytes)}</dd>
+                      <dt className="text-slate-400 dark:text-slate-500">파일 크기</dt>
+                      <dd className="text-slate-700 font-medium tabular-nums dark:text-slate-300">{formatBytes(session.audio.sizeBytes)}</dd>
                     </div>
                     <div className="flex items-center justify-between">
-                      <dt className="text-slate-400">포맷</dt>
-                      <dd className="text-slate-700 font-medium">{session.audio.format.toUpperCase()}</dd>
+                      <dt className="text-slate-400 dark:text-slate-500">포맷</dt>
+                      <dd className="text-slate-700 font-medium dark:text-slate-300">{session.audio.format.toUpperCase()}</dd>
                     </div>
                     <div className="flex items-center justify-between">
-                      <dt className="text-slate-400">샘플레이트</dt>
-                      <dd className="text-slate-700 font-medium tabular-nums">{session.audio.sampleRateHz / 1000}kHz</dd>
+                      <dt className="text-slate-400 dark:text-slate-500">샘플레이트</dt>
+                      <dd className="text-slate-700 font-medium tabular-nums dark:text-slate-300">{session.audio.sampleRateHz / 1000}kHz</dd>
                     </div>
                     <div className="flex items-center justify-between">
-                      <dt className="text-slate-400">채널</dt>
-                      <dd className="text-slate-700 font-medium">{session.audio.channels === 1 ? '모노' : '스테레오'}</dd>
+                      <dt className="text-slate-400 dark:text-slate-500">채널</dt>
+                      <dd className="text-slate-700 font-medium dark:text-slate-300">{session.audio.channels === 1 ? '모노' : '스테레오'}</dd>
                     </div>
                   </dl>
 
@@ -268,8 +268,8 @@ export default function ArchivedSessionView({
                 </>
               ) : (
                 <div className="text-center py-6">
-                  <div className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-100 mb-3">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-slate-400" aria-hidden>
+                  <div className="inline-flex items-center justify-center w-11 h-11 rounded-full bg-slate-100 mb-3 dark:bg-slate-800">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-slate-400 dark:text-slate-500" aria-hidden>
                       <line x1="1" y1="1" x2="23" y2="23" />
                       <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6" />
                       <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23" />
@@ -277,8 +277,8 @@ export default function ArchivedSessionView({
                       <line x1="8" y1="23" x2="16" y2="23" />
                     </svg>
                   </div>
-                  <p className="text-[13px] font-medium text-slate-500">음성 미보관</p>
-                  <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                  <p className="text-[13px] font-medium text-slate-500 dark:text-slate-400">음성 미보관</p>
+                  <p className="text-[11px] text-slate-400 mt-1 leading-relaxed dark:text-slate-500">
                     L2(음성 처리) 동의를 받지 않아<br />
                     이 세션의 음성은 저장되지 않았어요.
                   </p>
@@ -291,10 +291,10 @@ export default function ArchivedSessionView({
           <Card>
             <CardHeader title="다룬 주제" />
             <CardBody>
-              <div className="text-[13px] font-semibold text-slate-900 mb-2 word-keep-all">{session.mainTopic}</div>
+              <div className="text-[13px] font-semibold text-slate-900 mb-2 word-keep-all dark:text-slate-100">{session.mainTopic}</div>
               <div className="flex flex-wrap gap-1.5">
                 {session.topics.map((t) => (
-                  <span key={t} className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700">
+                  <span key={t} className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 dark:text-slate-300 dark:bg-slate-800">
                     {t}
                   </span>
                 ))}
@@ -309,18 +309,18 @@ export default function ArchivedSessionView({
               {session.reportId ? (
                 <Link
                   href={`/reports/${session.reportId}`}
-                  className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition"
+                  className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition dark:bg-slate-800/50 dark:hover:bg-slate-800"
                 >
                   <div className="min-w-0">
-                    <div className="text-[12px] font-semibold text-slate-800">보호자 리포트</div>
-                    <div className="text-[11px] text-slate-400">발송 완료</div>
+                    <div className="text-[12px] font-semibold text-slate-800 dark:text-slate-200">보호자 리포트</div>
+                    <div className="text-[11px] text-slate-400 dark:text-slate-500">발송 완료</div>
                   </div>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-400" aria-hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-400 dark:text-slate-500" aria-hidden>
                     <path d="M9 6l6 6-6 6" />
                   </svg>
                 </Link>
               ) : (
-                <p className="text-[12px] text-slate-400">아직 보호자 리포트가 생성되지 않았어요</p>
+                <p className="text-[12px] text-slate-400 dark:text-slate-500">아직 보호자 리포트가 생성되지 않았어요</p>
               )}
             </CardBody>
           </Card>

@@ -20,7 +20,7 @@ const inputCls =
 
 function BuildingGlyph({ name }: { name: string }) {
   return (
-    <div className="grid place-items-center w-10 h-10 rounded-xl bg-slate-100 text-slate-700 shrink-0">
+    <div className="grid place-items-center w-10 h-10 rounded-xl bg-slate-100 text-slate-700 shrink-0 dark:text-slate-300 dark:bg-slate-800">
       <span className="text-[14px] font-bold">{name.charAt(0)}</span>
     </div>
   );
@@ -126,18 +126,18 @@ export default function FacilitiesClient({
               hint='우상단 "새 시설 등록" 버튼으로 시작하세요'
             />
           ) : (
-            <ul className="divide-y divide-slate-100">
+            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
               {facilities.map((f) => (
                 <li key={f.id} className="py-3 flex items-start gap-3">
                   <BuildingGlyph name={f.name} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[14px] font-semibold text-slate-900 truncate">{f.name}</span>
+                      <span className="text-[14px] font-semibold text-slate-900 truncate dark:text-slate-100">{f.name}</span>
                       {typeof f.memberCount === 'number' && (
-                        <span className="text-[11px] text-slate-400">회원 <span className="tabular-nums">{f.memberCount}</span>명</span>
+                        <span className="text-[11px] text-slate-400 dark:text-slate-500">회원 <span className="tabular-nums">{f.memberCount}</span>명</span>
                       )}
                     </div>
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-slate-500">
+                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[12px] text-slate-500 dark:text-slate-400">
                       {f.address && (
                         <span className="inline-flex items-center gap-1.5"><PinIcon /><span className="truncate">{f.address}</span></span>
                       )}
@@ -149,7 +149,7 @@ export default function FacilitiesClient({
                           <UserIcon />
                           <span>
                             {f.managerName ?? '관리자'}
-                            {f.managerPhone && <span className="ml-1 tabular-nums text-slate-400">{f.managerPhone}</span>}
+                            {f.managerPhone && <span className="ml-1 tabular-nums text-slate-400 dark:text-slate-500">{f.managerPhone}</span>}
                           </span>
                         </span>
                       )}
@@ -162,7 +162,7 @@ export default function FacilitiesClient({
                   <div className="flex items-center gap-1 shrink-0">
                     <button
                       onClick={() => openEdit(f)}
-                      className="px-3 py-1.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition"
+                      className="px-3 py-1.5 rounded-lg text-[12px] font-semibold text-slate-600 hover:bg-slate-100 transition dark:text-slate-400 dark:hover:bg-slate-800"
                     >
                       수정
                     </button>
@@ -265,15 +265,15 @@ function FacilityFormDrawer({
         aria-label={editing ? '시설 수정' : '새 시설 등록'}
         className="fixed top-0 right-0 bottom-0 z-50 w-full sm:w-[480px] max-w-[100vw] bg-white shadow-2xl flex flex-col animate-fade-in-up overflow-hidden"
       >
-        <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between gap-3">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-start justify-between gap-3 dark:border-slate-800">
           <div>
-            <div className="text-[18px] font-bold text-slate-900 tracking-tight">
+            <div className="text-[18px] font-bold text-slate-900 tracking-tight dark:text-slate-100">
               {editing ? '시설 수정' : '새 시설 등록'}
             </div>
-            <div className="text-[12px] text-slate-400 mt-0.5">시설명만 필수, 나머지는 선택 입력입니다.</div>
+            <div className="text-[12px] text-slate-400 mt-0.5 dark:text-slate-500">시설명만 필수, 나머지는 선택 입력입니다.</div>
           </div>
-          <button onClick={onClose} aria-label="닫기" className="grid place-items-center w-9 h-9 rounded-full hover:bg-slate-100 active:scale-95 transition">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-slate-700" aria-hidden>
+          <button onClick={onClose} aria-label="닫기" className="grid place-items-center w-9 h-9 rounded-full hover:bg-slate-100 active:scale-95 transition dark:hover:bg-slate-800">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-slate-700 dark:text-slate-300" aria-hidden>
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
@@ -281,8 +281,8 @@ function FacilityFormDrawer({
 
         <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">기본</div>
-            <label className="block text-[12px] font-semibold text-slate-500 mb-1.5">
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">기본</div>
+            <label className="block text-[12px] font-semibold text-slate-500 mb-1.5 dark:text-slate-400">
               시설명 <span className="text-red-500">*</span>
             </label>
             <input
@@ -296,10 +296,10 @@ function FacilityFormDrawer({
           </section>
 
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">연락처</div>
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">연락처</div>
             <div className="space-y-3">
               <div>
-                <label className="block text-[12px] font-semibold text-slate-500 mb-1.5">대표 전화</label>
+                <label className="block text-[12px] font-semibold text-slate-500 mb-1.5 dark:text-slate-400">대표 전화</label>
                 <input
                   type="tel"
                   value={phone}
@@ -310,7 +310,7 @@ function FacilityFormDrawer({
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[12px] font-semibold text-slate-500 mb-1.5">관리자 이름</label>
+                  <label className="block text-[12px] font-semibold text-slate-500 mb-1.5 dark:text-slate-400">관리자 이름</label>
                   <input
                     type="text"
                     value={managerName}
@@ -320,7 +320,7 @@ function FacilityFormDrawer({
                   />
                 </div>
                 <div>
-                  <label className="block text-[12px] font-semibold text-slate-500 mb-1.5">관리자 번호</label>
+                  <label className="block text-[12px] font-semibold text-slate-500 mb-1.5 dark:text-slate-400">관리자 번호</label>
                   <input
                     type="tel"
                     value={managerPhone}
@@ -334,7 +334,7 @@ function FacilityFormDrawer({
           </section>
 
           <section>
-            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3">주소</div>
+            <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 mb-3 dark:text-slate-500">주소</div>
             <input
               type="text"
               value={address}
@@ -345,7 +345,7 @@ function FacilityFormDrawer({
           </section>
         </div>
 
-        <div className="border-t border-slate-100 bg-white">
+        <div className="border-t border-slate-100 bg-white dark:border-slate-800">
           {error && (
             <div className="mx-5 mt-3 rounded-xl bg-red-50 ring-1 ring-red-200 px-3 py-2 text-[12px] text-red-700 animate-fade-in">
               {error}
@@ -355,7 +355,7 @@ function FacilityFormDrawer({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition"
+              className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 active:scale-[0.99] transition dark:text-slate-300 dark:bg-slate-800/50 dark:ring-slate-700 dark:hover:bg-slate-800"
             >
               취소
             </button>
@@ -397,10 +397,10 @@ function ConfirmDialog({
     <>
       <button aria-label="닫기" onClick={onCancel} className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm animate-fade-in" />
       <div role="dialog" aria-label={title} className="fixed left-1/2 top-1/2 z-50 w-[92%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-2xl animate-fade-in-up p-5">
-        <div className="text-[16px] font-bold text-slate-900 tracking-tight">{title}</div>
-        {description && <p className="mt-2 text-[13px] text-slate-500 leading-relaxed">{description}</p>}
+        <div className="text-[16px] font-bold text-slate-900 tracking-tight dark:text-slate-100">{title}</div>
+        {description && <p className="mt-2 text-[13px] text-slate-500 leading-relaxed dark:text-slate-400">{description}</p>}
         <div className="mt-5 grid grid-cols-2 gap-2">
-          <button onClick={onCancel} className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 transition">
+          <button onClick={onCancel} className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 transition dark:text-slate-300 dark:bg-slate-800/50 dark:ring-slate-700 dark:hover:bg-slate-800">
             취소
           </button>
           <button

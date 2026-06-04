@@ -42,20 +42,20 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen grid place-items-center px-6 bg-slate-50">
+    <div className="min-h-screen grid place-items-center px-6 bg-slate-50 dark:bg-slate-800/50">
       <div className="w-full max-w-[400px]">
         <div className="mb-10 text-center">
           <span className="inline-flex items-baseline text-[28px] tracking-tight leading-none">
-            <span className="font-medium text-slate-700">rem</span>
-            <span className="font-bold text-slate-900">AI</span>
-            <span className="font-medium text-slate-700">n</span>
-            <span className="ml-2 text-[12px] font-semibold tracking-widest text-slate-400 uppercase">Admin</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300">rem</span>
+            <span className="font-bold text-slate-900 dark:text-slate-100">AI</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300">n</span>
+            <span className="ml-2 text-[12px] font-semibold tracking-widest text-slate-400 uppercase dark:text-slate-500">Admin</span>
           </span>
         </div>
 
-        <div className="rounded-2xl bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.18)] ring-1 ring-slate-100 p-7">
-          <h1 className="text-[18px] font-bold text-slate-900 mb-1">로그인</h1>
-          <p className="text-[12px] text-slate-500 mb-6">관리자 계정 정보로 로그인하세요.</p>
+        <div className="rounded-2xl bg-white shadow-[0_8px_30px_-12px_rgba(15,23,42,0.18)] ring-1 ring-slate-100 p-7 dark:ring-slate-800">
+          <h1 className="text-[18px] font-bold text-slate-900 mb-1 dark:text-slate-100">로그인</h1>
+          <p className="text-[12px] text-slate-500 mb-6 dark:text-slate-400">관리자 계정 정보로 로그인하세요.</p>
 
           {!supabaseReady && (
             <div className="mb-4 rounded-xl bg-amber-50 ring-1 ring-amber-200 px-3 py-2 text-[12px] text-amber-800">
@@ -66,7 +66,7 @@ export default function LoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-[12px] font-semibold text-slate-500 mb-1.5">이메일</label>
+              <label className="block text-[12px] font-semibold text-slate-500 mb-1.5 dark:text-slate-400">이메일</label>
               <input
                 type="email"
                 required
@@ -74,18 +74,18 @@ export default function LoginForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
                 placeholder="admin@example.com"
-                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-100 text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-100 text-[14px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:text-slate-200 dark:bg-slate-800/50 dark:ring-slate-800 dark:placeholder:text-slate-500"
               />
             </div>
             <div>
-              <label className="block text-[12px] font-semibold text-slate-500 mb-1.5">비밀번호</label>
+              <label className="block text-[12px] font-semibold text-slate-500 mb-1.5 dark:text-slate-400">비밀번호</label>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-100 text-[14px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                className="w-full px-3 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-100 text-[14px] text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:text-slate-200 dark:bg-slate-800/50 dark:ring-slate-800"
               />
             </div>
 
@@ -105,7 +105,7 @@ export default function LoginForm() {
           </form>
         </div>
 
-        <p className="mt-6 text-center text-[11px] text-slate-400">
+        <p className="mt-6 text-center text-[11px] text-slate-400 dark:text-slate-500">
           비밀번호 재설정·계정 추가는 Supabase 대시보드에서 처리합니다.
         </p>
       </div>

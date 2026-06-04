@@ -129,7 +129,7 @@ export default function PrefsCardsClient({
               return (
                 <li key={k} className="py-3 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-semibold text-slate-800 dark:text-slate-100">{meta.name}</div>
+                    <div className="text-[14px] font-semibold text-slate-800 dark:text-slate-100 ">{meta.name}</div>
                     <div className="text-[12px] text-slate-400 dark:text-slate-500 mt-0.5">{meta.desc}</div>
                   </div>
                   <Toggle
@@ -158,7 +158,7 @@ export default function PrefsCardsClient({
               return (
                 <li key={k} className="py-3 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-semibold text-slate-800 dark:text-slate-100">{meta.label}</div>
+                    <div className="text-[14px] font-semibold text-slate-800 dark:text-slate-100 ">{meta.label}</div>
                     <div className="text-[12px] text-slate-400 dark:text-slate-500 mt-0.5">{meta.desc}</div>
                   </div>
                   <Toggle
@@ -198,7 +198,7 @@ export default function PrefsCardsClient({
             type="button"
             onClick={reset}
             disabled={pending}
-            className="px-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-60 transition"
+            className="px-4 py-2.5 rounded-xl text-[13px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-60 transition "
           >
             되돌리기
           </button>

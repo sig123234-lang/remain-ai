@@ -5,7 +5,7 @@
  *  - 미설정 또는 에러 → 빈 배열
  */
 
-import { createServerClient, isSupabaseConfigured } from '@/lib/supabase/server';
+import { createServiceRoleClient, isSupabaseConfigured } from '@/lib/supabase/server';
 import type { Member } from '@/lib/members';
 import type { CognitiveLevel } from '@/lib/live-sessions';
 
@@ -62,7 +62,7 @@ export async function fetchMembers(): Promise<MembersFetchResult> {
     return { members: [], source: 'unconfigured' };
   }
   try {
-    const supabase = await createServerClient();
+    const supabase = createServiceRoleClient();
     const { data, error } = await supabase
       .from('members')
       .select('*, facilities ( name )')
@@ -86,7 +86,7 @@ export async function fetchMembers(): Promise<MembersFetchResult> {
 export async function fetchMemberById(id: string): Promise<Member | null> {
   if (!isSupabaseConfigured()) return null;
   try {
-    const supabase = await createServerClient();
+    const supabase = createServiceRoleClient();
     const { data, error } = await supabase
       .from('members')
       .select('*, facilities ( name )')

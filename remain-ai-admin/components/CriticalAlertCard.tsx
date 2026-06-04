@@ -8,12 +8,12 @@ export default function CriticalAlertCard({ session, onSelect }: { session: Live
   const topAlert = session.alerts[0];
   return (
     <div className="
-      relative rounded-2xl
-      bg-gradient-to-br from-red-50 via-red-50 to-white
-      ring-1 ring-red-200
-      shadow-[0_4px_18px_-8px_rgba(239,68,68,0.35)]
-      overflow-hidden
-    ">
+ relative rounded-2xl
+ bg-gradient-to-br from-red-50 via-red-50 to-white
+ ring-1 ring-red-200
+ shadow-[0_4px_18px_-8px_rgba(239,68,68,0.35)]
+ overflow-hidden
+ ">
       {/* 좌측 강조 바 */}
       <span className="absolute left-0 top-4 bottom-4 w-1 rounded-r bg-red-500" aria-hidden />
 
@@ -38,15 +38,15 @@ export default function CriticalAlertCard({ session, onSelect }: { session: Live
                 {session.elapsedMinutes}분째 진행 중
               </span>
             </div>
-            <div className="text-[16px] sm:text-[17px] font-bold text-slate-900 truncate">
+            <div className="text-[16px] sm:text-[17px] font-bold text-slate-900 truncate dark:text-slate-100">
               {session.elderly.name} 회원님 — {topAlert?.kind ?? '위기 신호 감지'}
             </div>
-            <div className="text-[12px] text-slate-500 mt-0.5 truncate">
+            <div className="text-[12px] text-slate-500 mt-0.5 truncate dark:text-slate-400">
               {session.facility} · {session.elderly.age}세 · {session.elderly.sessionNumber}회차
             </div>
             {session.recent && (
-              <div className="mt-2 text-[13px] text-slate-700 leading-relaxed word-keep-all line-clamp-2">
-                <span className="font-semibold text-slate-900 mr-1">
+              <div className="mt-2 text-[13px] text-slate-700 leading-relaxed word-keep-all line-clamp-2 dark:text-slate-300">
+                <span className="font-semibold text-slate-900 mr-1 dark:text-slate-100">
                   {session.recent.role === 'elderly' ? '회원님' : 'AI'}:
                 </span>
                 {session.recent.text}

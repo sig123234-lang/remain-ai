@@ -60,14 +60,14 @@ export default function IntegrationsCard({ integrations }: { integrations: Integ
           {integrations.map((s) => (
             <li key={s.id} className="py-3 flex items-center gap-3">
               <div className="flex-1 min-w-0">
-                <div className="text-[14px] font-semibold text-slate-800 dark:text-slate-100">{s.name}</div>
+                <div className="text-[14px] font-semibold text-slate-800 dark:text-slate-100 ">{s.name}</div>
                 <div className="text-[12px] text-slate-400 dark:text-slate-500 mt-0.5">{s.detail}</div>
               </div>
               {s.id === 'anthropic' && s.connected && (
                 <button
                   onClick={runAnthropicTest}
                   disabled={test.status === 'loading'}
-                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[12px] font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-60 transition"
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-[12px] font-semibold text-slate-700 dark:text-slate-200 disabled:opacity-60 transition "
                 >
                   {test.status === 'loading' ? '호출 중…' : '테스트'}
                 </button>
@@ -84,7 +84,7 @@ export default function IntegrationsCard({ integrations }: { integrations: Integ
         {test.status === 'ok' && (
           <div className="mt-4 rounded-xl bg-emerald-50 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:ring-emerald-900/60 p-4">
             <div className="text-[12px] font-semibold text-emerald-800 dark:text-emerald-300 mb-2">✓ Claude 응답 정상</div>
-            <div className="text-[13px] text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-wrap">
+            <div className="text-[13px] text-slate-800 dark:text-slate-100 leading-relaxed whitespace-pre-wrap ">
               {test.text}
             </div>
             {test.usage && (

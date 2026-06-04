@@ -217,11 +217,11 @@ function SidebarContents({ onNavigate, user }: { onNavigate?: () => void; user: 
 
       <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-3 px-2">
-          <div className="grid place-items-center w-8 h-8 rounded-full bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300 text-[12px] font-semibold">
+          <div className="grid place-items-center w-8 h-8 rounded-full bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-300 text-[12px] font-semibold ">
             {(user?.name ?? '관').charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-[13px] font-semibold text-slate-800 dark:text-slate-100 truncate">{user?.name ?? '관리자'}</div>
+            <div className="text-[13px] font-semibold text-slate-800 dark:text-slate-100 truncate ">{user?.name ?? '관리자'}</div>
             <div className="text-[11px] text-slate-400 dark:text-slate-500 truncate">{user?.email ?? '미연결 (.env 셋업 필요)'}</div>
           </div>
           {user && (
@@ -257,13 +257,13 @@ export default function AdminShell({ children, user = null }: { children: ReactN
       {/* 데스크탑 사이드바 (≥lg) */}
       <aside
         className="
-          hidden lg:flex
-          fixed left-0 top-0 bottom-0 z-40
-          w-64
-          flex-col
-          bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-800
-          px-5 py-8
-        "
+ hidden lg:flex
+ fixed left-0 top-0 bottom-0 z-40
+ w-64
+ flex-col
+ bg-white dark:bg-slate-950 border-r border-slate-100 dark:border-slate-800
+ px-5 py-8
+ "
         aria-label="사이드 네비게이션"
       >
         <SidebarContents user={user} />
@@ -271,7 +271,7 @@ export default function AdminShell({ children, user = null }: { children: ReactN
 
       {/* 모바일/태블릿 상단 바 (< lg) */}
       <header className="lg:hidden sticky top-0 z-30 bg-white/95 dark:bg-slate-950/90 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center justify-between px-5 py-3 pt-safe">
+        <div className="flex items-center justify-between px-5 pb-3 pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
           <Link href="/" aria-label="홈으로 이동" onClick={closeDrawer}>
             <Logo size="sm" />
           </Link>
@@ -295,13 +295,13 @@ export default function AdminShell({ children, user = null }: { children: ReactN
           />
           <aside
             className="
-              lg:hidden fixed top-0 bottom-0 left-0 z-50
-              w-72 max-w-[85vw]
-              flex flex-col
-              bg-white dark:bg-slate-950 shadow-2xl
-              px-5 py-8 pt-safe
-              animate-fade-in-up
-            "
+ lg:hidden fixed top-0 bottom-0 left-0 z-50
+ w-72 max-w-[85vw]
+ flex flex-col
+ bg-white dark:bg-slate-950 shadow-2xl
+ px-5 py-8 pt-safe
+ animate-fade-in-up
+ "
             aria-label="모바일 네비게이션"
           >
             <button

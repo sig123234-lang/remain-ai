@@ -62,7 +62,7 @@ export default async function SettingsPage() {
           />
           <CardBody>
             <p className="text-[13px] text-slate-500 dark:text-slate-400">
-              시설명·연락처·주소는 <Link href="/facilities" className="underline font-semibold text-slate-700 dark:text-slate-200">시설 관리</Link>에서 등록·수정합니다.
+              시설명·연락처·주소는 <Link href="/facilities" className="underline font-semibold text-slate-700 dark:text-slate-200 ">시설 관리</Link>에서 등록·수정합니다.
             </p>
           </CardBody>
         </Card>

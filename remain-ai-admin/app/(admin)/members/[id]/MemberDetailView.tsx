@@ -60,25 +60,25 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
           <Link
             href="/members"
             aria-label="회원 목록으로"
-            className="grid place-items-center w-9 h-9 rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50 active:scale-95 transition shrink-0"
+            className="grid place-items-center w-9 h-9 rounded-full bg-white ring-1 ring-slate-200 hover:bg-slate-50 active:scale-95 transition shrink-0 dark:ring-slate-700 dark:hover:bg-slate-800/50"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-700" aria-hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-700 dark:text-slate-300" aria-hidden>
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </Link>
-          <div className="grid place-items-center w-12 h-12 rounded-full bg-slate-100 text-slate-700 text-[16px] font-bold shrink-0">
+          <div className="grid place-items-center w-12 h-12 rounded-full bg-slate-100 text-slate-700 text-[16px] font-bold shrink-0 dark:text-slate-300 dark:bg-slate-800">
             {member.name.charAt(0)}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[20px] sm:text-[22px] font-bold text-slate-900 tracking-tight">
+              <span className="text-[20px] sm:text-[22px] font-bold text-slate-900 tracking-tight dark:text-slate-100">
                 {member.name} 회원님
               </span>
               {member.inActiveSession && (
                 <Pill tone="success">진행 중</Pill>
               )}
             </div>
-            <div className="text-[12px] text-slate-400 truncate">
+            <div className="text-[12px] text-slate-400 truncate dark:text-slate-500">
               {member.age}세 · {cognitiveBadge(member.cognitiveLevel)} · {member.facility} · {member.sessionCount}회차 완료 · 마지막 {timeAgoKo(member.lastSessionAt)}
             </div>
           </div>
@@ -103,10 +103,10 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
         <>
           <button aria-label="닫기" onClick={() => !deleting && setConfirmOpen(false)} className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm animate-fade-in" />
           <div role="dialog" aria-label="회원 삭제 확인" className="fixed left-1/2 top-1/2 z-50 w-[92%] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-2xl animate-fade-in-up p-5">
-            <div className="text-[16px] font-bold text-slate-900 tracking-tight">
+            <div className="text-[16px] font-bold text-slate-900 tracking-tight dark:text-slate-100">
               "{member.name}" 회원님을 삭제할까요?
             </div>
-            <p className="mt-2 text-[13px] text-slate-500 leading-relaxed">
+            <p className="mt-2 text-[13px] text-slate-500 leading-relaxed dark:text-slate-400">
               세션 기록·대화 로그·음성 파일도 함께 삭제됩니다. 이 작업은 되돌릴 수 없어요.
             </p>
             {deleteError && (
@@ -118,7 +118,7 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
               <button
                 onClick={() => setConfirmOpen(false)}
                 disabled={deleting}
-                className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 disabled:opacity-60 transition"
+                className="px-4 py-2.5 rounded-xl bg-slate-50 ring-1 ring-slate-200 text-slate-700 text-[13px] font-semibold hover:bg-slate-100 disabled:opacity-60 transition dark:text-slate-300 dark:bg-slate-800/50 dark:ring-slate-700 dark:hover:bg-slate-800"
               >
                 취소
               </button>
@@ -145,26 +145,26 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
               {member.guardianName ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <div className="grid place-items-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold">
+                    <div className="grid place-items-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 text-[11px] font-bold dark:text-slate-400 dark:bg-slate-800">
                       {member.guardianName.charAt(0)}
                     </div>
                     <div>
-                      <div className="text-[14px] font-semibold text-slate-900">{member.guardianName}님</div>
-                      <div className="text-[11px] text-slate-400">{member.guardianRelation}</div>
+                      <div className="text-[14px] font-semibold text-slate-900 dark:text-slate-100">{member.guardianName}님</div>
+                      <div className="text-[11px] text-slate-400 dark:text-slate-500">{member.guardianRelation}</div>
                     </div>
                   </div>
                   <div className="pt-2 space-y-1 text-[12px]">
                     {member.guardianPhone && (
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-400" aria-hidden>
+                      <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" aria-hidden>
                           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
                         </svg>
                         <span className="tabular-nums">{member.guardianPhone}</span>
                       </div>
                     )}
                     {member.guardianEmail && (
-                      <div className="flex items-center gap-2 text-slate-700">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-400" aria-hidden>
+                      <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" aria-hidden>
                           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                           <polyline points="22,6 12,13 2,6" />
                         </svg>
@@ -180,7 +180,7 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
                   </div>
                 </div>
               ) : (
-                <p className="text-[13px] text-slate-400">보호자 미등록 — 리포트 발송 불가</p>
+                <p className="text-[13px] text-slate-400 dark:text-slate-500">보호자 미등록 — 리포트 발송 불가</p>
               )}
             </CardBody>
           </Card>
@@ -192,16 +192,16 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
               <CardBody>
                 <ul className="space-y-2 text-[13px]">
                   <li className="flex items-center justify-between">
-                    <span className="text-slate-600">아버지</span>
-                    <span className="text-slate-700 font-medium">{aliveLabel(member.familyStatus.father)}</span>
+                    <span className="text-slate-600 dark:text-slate-400">아버지</span>
+                    <span className="text-slate-700 font-medium dark:text-slate-300">{aliveLabel(member.familyStatus.father)}</span>
                   </li>
                   <li className="flex items-center justify-between">
-                    <span className="text-slate-600">어머니</span>
-                    <span className="text-slate-700 font-medium">{aliveLabel(member.familyStatus.mother)}</span>
+                    <span className="text-slate-600 dark:text-slate-400">어머니</span>
+                    <span className="text-slate-700 font-medium dark:text-slate-300">{aliveLabel(member.familyStatus.mother)}</span>
                   </li>
                   <li className="flex items-center justify-between">
-                    <span className="text-slate-600">배우자</span>
-                    <span className="text-slate-700 font-medium">{aliveLabel(member.familyStatus.spouse)}</span>
+                    <span className="text-slate-600 dark:text-slate-400">배우자</span>
+                    <span className="text-slate-700 font-medium dark:text-slate-300">{aliveLabel(member.familyStatus.spouse)}</span>
                   </li>
                 </ul>
               </CardBody>
@@ -269,25 +269,25 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
                     <li key={s.id}>
                       <Link
                         href={`/members/${member.id}/sessions/${s.id}`}
-                        className="block rounded-xl bg-slate-50 hover:bg-slate-100 ring-1 ring-slate-100 hover:ring-slate-200 p-4 transition group"
+                        className="block rounded-xl bg-slate-50 hover:bg-slate-100 ring-1 ring-slate-100 hover:ring-slate-200 p-4 transition group dark:bg-slate-800/50 dark:ring-slate-800 dark:hover:bg-slate-800"
                       >
                         <div className="flex items-start justify-between gap-3 flex-wrap">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className="text-[14px] font-bold text-slate-900">{s.sessionNumber}회차</span>
-                              <span className="text-[12px] text-slate-400 tabular-nums">{dateKo(s.startedAt)}</span>
+                              <span className="text-[14px] font-bold text-slate-900 dark:text-slate-100">{s.sessionNumber}회차</span>
+                              <span className="text-[12px] text-slate-400 tabular-nums dark:text-slate-500">{dateKo(s.startedAt)}</span>
                               <span className="text-[11px] text-slate-300">·</span>
-                              <span className="text-[12px] text-slate-500">{s.durationMinutes}분</span>
+                              <span className="text-[12px] text-slate-500 dark:text-slate-400">{s.durationMinutes}분</span>
                               {s.treasureDetected && <Pill tone="info">깊은 이야기</Pill>}
                               {s.riskFlagged && <Pill tone="critical">위기 신호</Pill>}
                               {s.reportId && <Pill tone="success">리포트 발송됨</Pill>}
                             </div>
-                            <div className="text-[13px] font-medium text-slate-800 mb-1.5 truncate">
+                            <div className="text-[13px] font-medium text-slate-800 mb-1.5 truncate dark:text-slate-200">
                               {s.mainTopic}
                             </div>
                             <div className="flex flex-wrap gap-1">
                               {s.topics.slice(0, 4).map((t) => (
-                                <span key={t} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-white text-slate-600 ring-1 ring-slate-200">
+                                <span key={t} className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-white text-slate-600 ring-1 ring-slate-200 dark:text-slate-400 dark:ring-slate-700">
                                   {t}
                                 </span>
                               ))}
@@ -305,10 +305,10 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
                             ) : (
                               <div className="text-[11px] text-slate-300 font-medium">텍스트만</div>
                             )}
-                            <span className="text-[12px] font-semibold text-slate-400 tabular-nums">
+                            <span className="text-[12px] font-semibold text-slate-400 tabular-nums dark:text-slate-500">
                               {s.turnCount}대화
                             </span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition" aria-hidden>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition dark:group-hover:text-slate-400" aria-hidden>
                               <path d="M9 6l6 6-6 6" />
                             </svg>
                           </div>
@@ -327,26 +327,26 @@ export default function MemberDetailView({ member, sessions }: { member: Member;
               <CardHeader title="누적 통계" />
               <CardBody>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="rounded-lg bg-slate-50 p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">총 세션</div>
-                    <div className="mt-1 text-[20px] font-bold text-slate-900 tabular-nums">{sessions.length}</div>
+                  <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">총 세션</div>
+                    <div className="mt-1 text-[20px] font-bold text-slate-900 tabular-nums dark:text-slate-100">{sessions.length}</div>
                   </div>
-                  <div className="rounded-lg bg-slate-50 p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">총 대화 시간</div>
-                    <div className="mt-1 text-[20px] font-bold text-slate-900 tabular-nums">
-                      {sessions.reduce((a, s) => a + s.durationMinutes, 0)}<span className="text-[12px] font-normal text-slate-400">분</span>
+                  <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">총 대화 시간</div>
+                    <div className="mt-1 text-[20px] font-bold text-slate-900 tabular-nums dark:text-slate-100">
+                      {sessions.reduce((a, s) => a + s.durationMinutes, 0)}<span className="text-[12px] font-normal text-slate-400 dark:text-slate-500">분</span>
                     </div>
                   </div>
-                  <div className="rounded-lg bg-slate-50 p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">깊은 이야기</div>
+                  <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">깊은 이야기</div>
                     <div className="mt-1 text-[20px] font-bold text-violet-700 tabular-nums">
                       {sessions.filter((s) => s.treasureDetected).length}
                     </div>
                   </div>
-                  <div className="rounded-lg bg-slate-50 p-3">
-                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">음성 보관</div>
-                    <div className="mt-1 text-[20px] font-bold text-slate-900 tabular-nums">
-                      {sessions.filter((s) => s.audio.stored).length}<span className="text-[12px] font-normal text-slate-400">/{sessions.length}</span>
+                  <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800/50">
+                    <div className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold dark:text-slate-500">음성 보관</div>
+                    <div className="mt-1 text-[20px] font-bold text-slate-900 tabular-nums dark:text-slate-100">
+                      {sessions.filter((s) => s.audio.stored).length}<span className="text-[12px] font-normal text-slate-400 dark:text-slate-500">/{sessions.length}</span>
                     </div>
                   </div>
                 </div>

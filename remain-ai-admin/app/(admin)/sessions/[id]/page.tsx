@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
-import { findSessionById } from '@/lib/live-sessions';
+import { fetchLiveSessionById } from '@/lib/sessions-server';
 import LiveListenView from './LiveListenView';
+
+export const dynamic = 'force-dynamic';
 
 export default async function SessionListenPage({
   params,
@@ -8,9 +10,9 @@ export default async function SessionListenPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = findSessionById(id);
-  if (!session) {
+  const result = await fetchLiveSessionById(id);
+  if (!result) {
     notFound();
   }
-  return <LiveListenView session={session} />;
+  return <LiveListenView session={result.session} mode={result.mode} />;
 }
